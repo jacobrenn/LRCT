@@ -3,6 +3,7 @@ from Node import Node
 import numpy as np
 import pandas as pd
 import warnings
+from splitting_functions import find_best_lrct_split
 
 class LRCTree:
 
@@ -155,4 +156,27 @@ class LRCTree:
             print('\n'.join([f'{"-"*n.depth}{n}' for n in self._nodes.values()]))
 
     def _find_node_split(self, node_id, x_data, y_data):
-        pass
+        
+        x_copy = x_data.copy()
+        
+        node = self._nodes[node_id]
+        parent_id = node.identifier
+        highest_id = max(self._nodes.keys())
+
+        split_col, split_value = find_best_lrct_split(x_copy, y_data)
+        if split_col not in x_copy.columns:
+            rest, last_col = surface_function.split(' - ')[0], surface_function.split(' - ')[1]
+            new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
+            new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
+            new_col_components = []
+            for i in range(len(new_coefs)):
+                if '^' in new_cols[i]:
+                    col, exp = new_cols[i].split('^')
+                    new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
+                else:
+                    new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
+            new_col_str = ' + '.join(new_col_components)
+            new_col_str += f' - x_values["{last_col}"]'
+            x_copy[split_col] = eval(new_col_str)
+
+        # TODO: make the split, create the nodes, and return nodes and data
