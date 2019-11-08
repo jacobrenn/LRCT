@@ -1,4 +1,5 @@
 from splitting_functions import find_best_split, find_best_lrct_split
+from Node import Node
 import numpy as np
 import pandas as pd
 import warnings
@@ -27,14 +28,17 @@ class LRCTree:
         self.n_bins = n_bins
         self.kwargs = kwargs
 
+        self._nodes = {}
+
     @property
     def max_depth(self):
         return self._max_depth
     @max_depth.setter
     def max_depth(self, value):
-        if not isinstance(value, int):
+        nn = value is not None
+        if not isinstance(value, int) and nn:
             raise TypeError('max_depth must be int')
-        if value <= 0:
+        if nn and value <= 0:
             raise ValueError('max_depth must be greater than 0')
         self._max_depth = value
     
@@ -82,4 +86,73 @@ class LRCTree:
             raise TypeError('LRCT currently supports integer-valued highest degrees')
         self._highest_degree = value
 
-    # TODO: properties for fit_intercepts, method, n_bins (and the whole rest of the object)
+    @property
+    def fit_intercepts(self):
+        return self._fit_intercepts
+    @fit_intercepts.setter
+    def fit_intercepts(self, value):
+        if not isinstance(value, bool):
+            raise TypeError('fit_intercepts must be boolean')
+        self._fit_intercepts = value
+
+    @property
+    def method(self):
+        return self._method
+    @method.setter
+    def method(self, value):
+        allowable_methods = ['ols', 'ridge', 'lasso']
+        if value not in allowable_methods:
+            raise ValueError(f'method must be one of {allowable_methods}')
+        self._method = value
+
+    @property
+    def n_bins(self):
+        return self._n_bins
+    @n_bins.setter
+    def n_bins(self, value):
+        if not isinstance(value, int):
+            raise TypeError('n_bins must be int')
+        if value <= 1:
+            raise ValueError('n_bins must be greater than or equal to 0')
+        self._n_bins = value
+
+    @property
+    def kwargs(self):
+        return self._kwargs
+    @kwargs.setter
+    def kwargs(self, value):
+        self._kwargs = value
+
+    @property
+    def nodes(self):
+        return [n for n in self._nodes.values()]
+    
+    def _add_nodes(self, nodes):
+        
+        is_node = isinstance(nodes, Node)
+        acceptable_list = isinstance(nodes, list) and all([isinstance(n, Node) for n in nodes])
+        
+        if not (is_node or acceptable_list):
+            raise ValueError('adding nodes requires Node objects or list of Node objects')
+
+        existing_ids = [id for id in self._nodes.keys()]
+        
+        if is_node and nodes.identifier in existing_ids:
+            raise ValueError('Node with that ID already exists')
+        if acceptable_list and any([n.identifier in existing_ids for n in nodes]):
+            raise ValueError('Trying to set Node with existing ID')
+        
+        if is_node:
+            self._nodes[nodes.identifier] = nodes
+        elif acceptable_list:
+            for node in nodes:
+                self._nodes[node.identifier] = node
+
+    def describe(self):
+        if self._nodes == {}:
+            print('Empty Tree')
+        else:
+            print('\n'.join([f'{"-"*n.depth}{n}' for n in self._nodes.values()]))
+
+    def _find_node_split(self, node_id, x_data, y_data):
+        pass
