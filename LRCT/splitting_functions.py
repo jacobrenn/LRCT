@@ -178,7 +178,7 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
         new_col_components = []
         for i in range(len(new_coefs)):
             if '^' in new_cols[i]:
-                col, exp = new_cols[i].split('^')
+                col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
                 new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
             else:
                 new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
