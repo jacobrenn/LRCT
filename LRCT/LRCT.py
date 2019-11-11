@@ -286,4 +286,5 @@ class LRCTree:
             if new_num_nodes == num_nodes:
                 break
         
+        self._is_fit = True
         return self
