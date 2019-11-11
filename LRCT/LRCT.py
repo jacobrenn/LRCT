@@ -1,6 +1,6 @@
-from splitting_functions import find_best_split, find_best_lrct_split
-from Node import Node
-from Exceptions import AlreadyFitError, NotFitError
+from LRCT.splitting_functions import find_best_split, find_best_lrct_split
+from LRCT.Node import Node
+from LRCT.Exceptions import AlreadyFitError, NotFitError
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score
@@ -206,11 +206,11 @@ class LRCTree:
             for i in range(len(new_coefs)):
                 if '^' in new_cols[i]:
                     col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
-                    new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
+                    new_col_components.append(f'{new_coefs[i]}*x_copy["{col}"]**{exp}')
                 else:
-                    new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
+                    new_col_components.append(f'{new_coefs[i]}*x_copy["{new_cols[i]}"]')
             new_col_str = ' + '.join(new_col_components)
-            new_col_str += f' - x_values["{last_col}"]'
+            new_col_str += f' - x_copy["{last_col}"]'
             new_col = eval(new_col_str)
             split_col_values = new_col
         else:
@@ -369,7 +369,6 @@ class LRCTree:
         if not self._is_fit:
             raise NotFitError
 
-        # Function is TODO
         probs = x.apply(lambda row : self._predict_single_proba(row), axis = 1).values
         return np.array([p.tolist() for p in probs])
 
@@ -379,4 +378,4 @@ class LRCTree:
 
     def fit_predict(self, x, y):
         self.fit(x, y)
-        return self.predict(x, y)
+        return self.predict(x)
