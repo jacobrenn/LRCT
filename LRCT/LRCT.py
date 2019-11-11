@@ -158,8 +158,8 @@ class LRCTree:
     def _split_node(self, node_id, x_data, y_data):
         
         #if x_data does not have more than min_samples_split rows or y_data has only one unique value, do nothing
-        if x_data.shape[0] < self.min_samples_leaf or np.unique(y_data).shape[0] == 1:
-            return
+        if x_data.shape[0] < self.min_samples_split or np.unique(y_data).shape[0] == 1:
+            return None
 
         x_copy = x_data.copy()
         
@@ -169,7 +169,7 @@ class LRCTree:
         
         #do not continue if already at max depth
         if parent_depth == self.max_depth:
-            return
+            return None
 
         
         highest_id = max(self._nodes.keys())
@@ -207,4 +207,8 @@ class LRCTree:
             parent_depth + 1
         )
         
-        # TODO: do some checking for min_samples_leaf and return the right stuff
+        if (less_idx.sum() < self.min_samples_leaf) or (greater_idx.sum() < self.min_samples_leaf):
+            return None
+        
+        self._add_nodes([less_node, greater_node])
+        return x_data.iloc[less_idx, :], x_data.iloc[greater_idx, :], y_data[less_idx], y_data[gretaer_idx]
