@@ -1,8 +1,9 @@
-from LRCT.splitting_functions import find_best_split, find_best_lrct_split
-from LRCT.Node import Node
-from LRCT.Exceptions import AlreadyFitError, NotFitError
+from splitting_functions import find_best_split, find_best_lrct_split
+from Node import Node
+from Exceptions import AlreadyFitError, NotFitError
 import numpy as np
 import pandas as pd
+from sklearn.metrics import accuracy_score
 import warnings
 
 class LRCTree:
@@ -287,17 +288,95 @@ class LRCTree:
                 break
         
         self._is_fit = True
+        self._values_to_predict = np.unique(y)
+        self._node_distributions = {
+            n.identifier : np.array([(node_data[n.identifier]['y'] == i).sum() for i in self._values_to_predict])
+            for n in self.nodes if n.split is np.nan
+        }
         return self
+
+    def _predict_single_instance(self, instance):
+        current_node = self._nodes[0]
+        while not (current_node.split is np.nan):
+            child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
+            split_col, split_value = current_node.split
+            if split_col not in instance.keys():
+                rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
+                new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
+                new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
+                new_col_components = []
+                for i in range(len(new_coefs)):
+                    if '^' in new_cols[i]:
+                        col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
+                        new_col_components.append(f'{new_coefs[i]}*instance["{col}"]**{exp}')
+                    else:
+                        new_col_components.append(f'{new_coefs[i]}*instance["{new_cols[i]}"]')
+                new_col_str = ' + '.join(new_col_components)
+                new_col_str += f' - instance["{last_col}"]'
+                val_to_check = eval(new_col_str)
+            else:
+                val_to_check = instance[split_col]
+
+            if val_to_check <= split_value:
+                new_node_id = min(child_node_ids)
+            else:
+                new_node_id = max(child_node_ids)
+            current_node = self._nodes[new_node_id]
+        
+        current_distribution = self._node_distributions[current_node.identifier]
+        if current_distribution.min() != current_distribution.max():
+            return current_distribution.argmax()
+        else:
+            return np.random.choice(self._values_to_predict.shape[0])
+
+    def _predict_single_proba(self, instance):
+        current_node = self._nodes[0]
+        while not (current_node.split is np.nan):
+            child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
+            split_col, split_value = current_node.split
+            if split_col not in instance.keys():
+                rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
+                new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
+                new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
+                new_col_components = []
+                for i in range(len(new_coefs)):
+                    if '^' in new_cols[i]:
+                        col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
+                        new_col_components.append(f'{new_coefs[i]}*instance["{col}"]**{exp}')
+                    else:
+                        new_col_components.append(f'{new_coefs[i]}*instance["{new_cols[i]}"]')
+                new_col_str = ' + '.join(new_col_components)
+                new_col_str += f' - instance["{last_col}"]'
+                val_to_check = eval(new_col_str)
+            else:
+                val_to_check = instance[split_col]
+
+            if val_to_check <= split_value:
+                new_node_id = min(child_node_ids)
+            else:
+                new_node_id = max(child_node_ids)
+            current_node = self._nodes[new_node_id]
+        
+        return self._node_distributions[current_node.identifier] / self._node_distributions[current_node.identifier].sum()
 
     def predict(self, x):
         if not self._is_fit:
             raise NotFitError
         
-        # Function is TODO
-        pass
+        return x.apply(lambda row : self._predict_single_instance(row), axis = 1).values
 
     def predict_proba(self, x):
         if not self._is_fit:
             raise NotFitError
 
         # Function is TODO
+        probs = x.apply(lambda row : self._predict_single_proba(row), axis = 1).values
+        return np.array([p.tolist() for p in probs])
+
+    def score(self, x, y):
+        preds = self.predict(x)
+        return accuracy_score(y, preds)
+
+    def fit_predict(self, x, y):
+        self.fit(x, y)
+        return self.predict(x, y)
