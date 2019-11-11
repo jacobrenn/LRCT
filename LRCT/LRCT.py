@@ -178,11 +178,10 @@ class LRCTree:
         #do not continue if already at max depth
         if parent_depth == self.max_depth:
             return None
-
         
         highest_id = max(self._nodes.keys())
 
-        split_col, split_value = find_best_lrct_split(
+        split_info = find_best_lrct_split(
             x_copy,
             y_data,
             self.n_independent,
@@ -192,6 +191,12 @@ class LRCTree:
             self.n_bins,
             **self.kwargs
         )
+
+        if split_info is np.nan:
+            return None
+        else:
+            split_col, split_value = split_info
+
         if split_col not in x_copy.columns:
             rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
             new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
@@ -228,7 +233,7 @@ class LRCTree:
             return None
         
         self._add_nodes([less_node, greater_node])
-        return highest_id + 1, highest_id + 2, x_data.iloc[less_idx, :], x_data.iloc[greater_idx, :], y_data[less_idx], y_data[greater_idx]
+        return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
 
     def fit(self, x, y):
 
@@ -246,26 +251,26 @@ class LRCTree:
         # add the parent Node
         self._add_nodes(Node())
 
-        while self.depth < self.max_depth:
-            current_depth_nodes = [n for n in self.nodes] if self.depth > 0 else [self._nodes[0]]
-            num_nodes = len(self.nodes)
-            
-            node_data = {
+        node_data = {
                 0 : {
                     'x' : x,
                     'y' : y
                 }
             }
+
+        while self.depth < self.max_depth:
+            current_depth_nodes = [n for n in self.nodes] if self.depth > 0 else [self._nodes[0]]
+            num_nodes = len(self.nodes)
             
             for n in current_depth_nodes:
                 split_results = self._split_node(n.identifier, node_data[n.identifier]['x'], node_data[n.identifier]['y'])
                 if split_results:
                     less_id = split_results[0]
                     greater_id = split_results[1]
-                    x_less = split_results[3]
-                    x_greater = split_results[4]
-                    y_less = split_results[5]
-                    y_greater = split_results[6]
+                    x_less = split_results[2]
+                    x_greater = split_results[3]
+                    y_less = split_results[4]
+                    y_greater = split_results[5]
 
                     node_data[less_id] = {
                         'x' : x_less,
