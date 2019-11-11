@@ -48,6 +48,9 @@ def _column_best_split(x_col, y_values):
 
 def find_best_split(x_values, y_values):
 
+    if np.unique(y_values).shape[0] == 1:
+        return np.nan
+
     if len(x_values.shape) == 1 or x_values.shape[1] == 1:
         return (0, _column_best_split(x_values, y_values)[0])
     
@@ -58,7 +61,7 @@ def find_best_split(x_values, y_values):
         y_values = y_values
     )
 
-    if split_results[1, :].min() is np.inf:
+    if split_results[1, :].min() == np.inf:
         return np.nan
 
     col_num = split_results[1, :].argmin()
@@ -116,7 +119,11 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
         
         #get the coordinate in the dimension of target_col
         try:
-            split = find_best_split(x_subset[:, target_col_index], y_subset)[1]
+            split_info = find_best_split(x_subset[:, target_col_index], y_subset)
+            if split_info is np.nan:
+                split = np.inf
+            else:
+                split = split_info[1]
         except IndexError:
             split = np.inf
         sub_array.append(split)
@@ -141,7 +148,7 @@ def create_surface_function(surface_coords, column_names, highest_degree = 1, fi
                 surface_coords[f'{col}**{degree}'] = surface_coords[col]**degree
 
     to_predict = surface_coords[column_names[-1]]
-    predict_from = surface_coords[[col for col in surface_coords.columns if col != column_names[-1]]]
+    predict_from = surface_coords[[col for col in surface_coords.columns.tolist() if col != column_names[-1]]]
 
     model.fit(predict_from.values, to_predict.values)
     coefs = model.coef_
@@ -163,27 +170,33 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
             target_col_index = ind[-1],
             bins_per_var = n_bins
         )
-        surface_function = create_surface_function(
-            surface_coords = surface_coords,
-            column_names = [cols[i] for i in ind],
-            highest_degree = highest_degree,
-            fit_intercept = fit_intercept,
-            method = method,
-            **kwargs
-        )
+        try:
+            surface_function = create_surface_function(
+                surface_coords = surface_coords,
+                column_names = [cols[i] for i in ind],
+                highest_degree = highest_degree,
+                fit_intercept = fit_intercept,
+                method = method,
+                **kwargs
+            )
 
-        rest, last_col = surface_function.split(' - ')[0], surface_function.split(' - ')[1]
-        new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
-        new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
-        new_col_components = []
-        for i in range(len(new_coefs)):
-            if '^' in new_cols[i]:
-                col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
-                new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
-            else:
-                new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
-        new_col_str = ' + '.join(new_col_components)
-        new_col_str += f' - x_values["{last_col}"]'
-        x_copy[surface_function] = eval(new_col_str)
-    col_num, split_value = find_best_split(x_copy, y_values)
-    return x_copy.columns[col_num], split_value
+            rest, last_col = surface_function.split(' - ')[0], surface_function.split(' - ')[1]
+            new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
+            new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
+            new_col_components = []
+            for i in range(len(new_coefs)):
+                if '^' in new_cols[i]:
+                    col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
+                    new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
+                else:
+                    new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
+            new_col_str = ' + '.join(new_col_components)
+            new_col_str += f' - x_values["{last_col}"]'
+            x_copy[surface_function] = eval(new_col_str)
+        except ValueError:
+            pass
+    split_info = find_best_split(x_copy, y_values)
+    if split_info is np.nan:
+        return split_info
+    else:
+        return x_copy.columns[split_info[0]], split_info[1]

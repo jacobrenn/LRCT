@@ -1,9 +1,9 @@
 from splitting_functions import find_best_split, find_best_lrct_split
 from Node import Node
+from AlreadyFitError import AlreadyFitError
 import numpy as np
 import pandas as pd
 import warnings
-from splitting_functions import find_best_lrct_split
 
 class LRCTree:
 
@@ -30,10 +30,18 @@ class LRCTree:
         self.kwargs = kwargs
 
         self._nodes = {}
+        self._is_fit = False
+
+    @property
+    def depth(self):
+        if self._nodes == {}:
+            return 0
+        else:
+            return max([n.depth for n in self.nodes])
 
     @property
     def max_depth(self):
-        return self._max_depth
+        return self._max_depth if self._max_depth else np.inf
     @max_depth.setter
     def max_depth(self, value):
         nn = value is not None
@@ -174,7 +182,16 @@ class LRCTree:
         
         highest_id = max(self._nodes.keys())
 
-        split_col, split_value = find_best_lrct_split(x_copy, y_data)
+        split_col, split_value = find_best_lrct_split(
+            x_copy,
+            y_data,
+            self.n_independent,
+            self.highest_degree,
+            self.fit_intercepts,
+            self.method,
+            self.n_bins,
+            **self.kwargs
+        )
         if split_col not in x_copy.columns:
             rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
             new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
@@ -211,4 +228,56 @@ class LRCTree:
             return None
         
         self._add_nodes([less_node, greater_node])
-        return x_data.iloc[less_idx, :], x_data.iloc[greater_idx, :], y_data[less_idx], y_data[gretaer_idx]
+        return highest_id + 1, highest_id + 2, x_data.iloc[less_idx, :], x_data.iloc[greater_idx, :], y_data[less_idx], y_data[greater_idx]
+
+    def fit(self, x, y):
+
+        if self._is_fit:
+            raise AlreadyFitError
+        if not isinstance(x, pd.DataFrame):
+            raise TypeError('x must be pandas DataFrame')
+        if not isinstance(y, (np.ndarray, pd.Series)):
+            raise TypeError('y must be ndarray or Series')
+        if len(y.shape) != 1:
+            raise ValueError('y must have a single dimension')
+        if self._nodes != {}:
+            raise ValueError('Tree already has nodes.  Must fit tree with no nodes')
+
+        # add the parent Node
+        self._add_nodes(Node())
+
+        while self.depth < self.max_depth:
+            current_depth_nodes = [n for n in self.nodes] if self.depth > 0 else [self._nodes[0]]
+            num_nodes = len(self.nodes)
+            
+            node_data = {
+                0 : {
+                    'x' : x,
+                    'y' : y
+                }
+            }
+            
+            for n in current_depth_nodes:
+                split_results = self._split_node(n.identifier, node_data[n.identifier]['x'], node_data[n.identifier]['y'])
+                if split_results:
+                    less_id = split_results[0]
+                    greater_id = split_results[1]
+                    x_less = split_results[3]
+                    x_greater = split_results[4]
+                    y_less = split_results[5]
+                    y_greater = split_results[6]
+
+                    node_data[less_id] = {
+                        'x' : x_less,
+                        'y' : y_less
+                    }
+
+                    node_data[greater_id] = {
+                        'x' : x_greater,
+                        'y' : y_greater
+                    }
+            new_num_nodes = len(self.nodes)
+            if new_num_nodes == num_nodes:
+                break
+        
+        return self
