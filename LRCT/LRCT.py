@@ -1,6 +1,6 @@
-from splitting_functions import find_best_split, find_best_lrct_split
-from Node import Node
-from AlreadyFitError import AlreadyFitError
+from LRCT.splitting_functions import find_best_split, find_best_lrct_split
+from LRCT.Node import Node
+from LRCT.Exceptions import AlreadyFitError, NotFitError
 import numpy as np
 import pandas as pd
 import warnings
@@ -288,3 +288,16 @@ class LRCTree:
         
         self._is_fit = True
         return self
+
+    def predict(self, x):
+        if not self._is_fit:
+            raise NotFitError
+        
+        # Function is TODO
+        pass
+
+    def predict_proba(self, x):
+        if not self._is_fit:
+            raise NotFitError
+
+        # Function is TODO
