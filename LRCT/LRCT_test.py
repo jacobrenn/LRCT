@@ -13,5 +13,7 @@ df = pd.DataFrame(
 y = np.array([0]*50 + [1]*50)
 
 tree = LRCTree()
-tree = tree.fit(df, y)
-tree.describe()
+try:
+    tree = tree.fit(df, y)
+finally:
+    tree.describe()

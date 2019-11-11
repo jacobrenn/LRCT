@@ -233,6 +233,7 @@ class LRCTree:
             return None
         
         self._add_nodes([less_node, greater_node])
+        self._nodes[parent_id].split = split_info
         return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
 
     def fit(self, x, y):
@@ -259,12 +260,12 @@ class LRCTree:
             }
 
         while self.depth < self.max_depth:
-            current_depth_nodes = [n for n in self.nodes] if self.depth > 0 else [self._nodes[0]]
+            current_depth_nodes = [n for n in self.nodes if n.depth == self.depth]
             num_nodes = len(self.nodes)
             
             for n in current_depth_nodes:
                 split_results = self._split_node(n.identifier, node_data[n.identifier]['x'], node_data[n.identifier]['y'])
-                if split_results:
+                if split_results is not None:
                     less_id = split_results[0]
                     greater_id = split_results[1]
                     x_less = split_results[2]
