@@ -18,7 +18,6 @@ def gini_impurity(values, weighted = False):
     impurity : float
         The impurity score
     '''
-
     # type checking
     if not isinstance(values, np.ndarray):
         raise TypeError('values must be numpy array')
@@ -255,6 +254,30 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
     return coord_array[coord_array[:, -1] != np.inf]
 
 def create_surface_function(surface_coords, column_names, highest_degree = 1, fit_intercept = True, method = 'ols', **kwargs):
+    '''Creates the estimate to the surface function
+
+    Parameters
+    ----------
+    surface_coords : numpy array
+        Coordinates from the surface, format expected from the get_surface_coords function
+    column_names : iterable
+        Names of the columns for the variables
+    highest_degree : int (default 1)
+        Highest degree to use for any single one of the variables
+    fit_intercept : bool (default True)
+        Whether to fit the intercepts in the regression training
+    method : str (default 'ols')
+        One of 'ols', 'ridge', and 'lasso' -- the method of linear regression to use
+    **kwargs : additional arguments
+        Additional arguments to pass to the linear regression model, if desired
+
+    Returns
+    -------
+    surface_funciton : str
+        A string corresponding to the surface function that is fit
+    '''
+
+    # checking for the different possibilities for method
     if method == 'ols':
         model = LinearRegression(fit_intercept = fit_intercept, **kwargs)
     elif method == 'ridge':
@@ -264,7 +287,10 @@ def create_surface_function(surface_coords, column_names, highest_degree = 1, fi
     else:
         raise ValueError(f'Accepted values for `mathod` are `ols`, `ridge`, and `lasso`, got {method}')
 
+    # get the DataFrame for the surface coordinates
     surface_coords = pd.DataFrame(surface_coords, columns = column_names)
+
+    # if highest_degree is greater than 1, make the new columns corresponding to that
     if highest_degree > 1:
         for col in surface_coords.columns[:-1]:
             for degree in range(2, highest_degree + 1):
