@@ -4,23 +4,58 @@ from itertools import product, combinations
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
 
 def gini_impurity(values, weighted = False):
+    '''Calculate the Gini impurity measure of a set of values
 
+    Parameters
+    ----------
+    values : 1d numpy array
+        The values to calculate score from
+    weighted : bool (default False)
+        Whether to return the weighted Gini impurity
+
+    Returns
+    -------
+    impurity : float
+        The impurity score
+    '''
+
+    # type checking
     if not isinstance(values, np.ndarray):
         raise TypeError('values must be numpy array')
     if len(values.shape) != 1:
         raise ValueError('values have too many dimensions')
 
+    # so these numbers don't have to be calculated multiple times
     total_num = values.shape[0]
     unique = np.unique(values)
 
+    # short cut
     if unique.shape in [0, 1]:
         return 0
     
+    # calculate the score as needed
     if weighted:
         return (1 - np.array([((values == value).sum()/total_num)**2 for value in unique]).sum()) * total_num
     return 1 - np.array([((values == value).sum()/total_num)**2 for value in unique]).sum()
 
 def _get_split_candidates(col):
+    '''Return all candidates for splitting from a column, i.e. the midpoints 
+    between all unique points in the column
+
+    Parameters
+    ----------
+    col : 1d numpy array
+        The column to find candidates for
+
+    Notes
+    -----
+    - Returns np.nan if exactly one unique value in the column
+
+    Returns
+    -------
+    candidates : numpy array
+        The splitting candidates
+    '''
     if col.shape[0] == 1:
         return np.nan
     unique_sorted = np.sort(np.unique(col))
@@ -29,14 +64,49 @@ def _get_split_candidates(col):
     return np.array(list(zip(unique_sorted, unique_sorted[1:]))).mean(axis = 1)
 
 def _split_candidate_results(x_col, y_values, candidate):
+    '''Calculate the results of splitting a column on a single value
+
+    Parameters
+    ----------
+    x_col : 1d numpy array
+        The column in X
+    y_values : 1d numpy array
+        The target values
+    candidate : numeric
+        The value to split x_col on
+
+    Returns
+    -------
+    impurity : float
+        The resulting weighted impurity from making the requested split
+    '''
+    # get the index
     idxer = x_col <= candidate
 
+    # calculated the weighted Gini impurity for each 'side'
     gini_less = gini_impurity(y_values[idxer], weighted = True)
     gini_greater = gini_impurity(y_values[~idxer], weighted = True)
     return (gini_less + gini_greater) / y_values.shape[0]
 
 def _column_best_split(x_col, y_values):
+    '''Calculate the best split for a column
 
+    Parameters
+    ----------
+    x_col : 1d numpy array
+        The column of X
+    y_values : 1d numpy array
+        The target values
+
+    Notes
+    -----
+    - If no split candidates are possible, returns array([np.inf, np.inf])
+
+    Returns
+    -------
+    split_results : numpy array, shape [2,0]
+        The split results, in order of value, resulting_impurity
+    '''
     candidates = _get_split_candidates(x_col)
 
     if candidates is np.nan:
@@ -47,7 +117,24 @@ def _column_best_split(x_col, y_values):
     return split_results[split_results[:, 1] == split_results[:, 1].min()][0, :]
 
 def find_best_split(x_values, y_values):
+    '''Find the best split for a set of values given a target
 
+    Parameters
+    ----------
+    x_values : 1d or 2d numpy array
+        The X
+    y_values : 1d numpy array
+        The target values
+
+    Notes
+    -----
+    - If no split is found, returns np.nan
+
+    Returns
+    -------
+    split_results : np.array
+        Array of the form [column, split_value] for the best split
+    '''
     if np.unique(y_values).shape[0] == 1:
         return np.nan
 
@@ -68,11 +155,27 @@ def find_best_split(x_values, y_values):
     return (col_num, split_results[0, col_num])
 
 def _single_col_bin(col, n_bins = 10):
+    '''Bin a single column'''
     m, M = col.min(), col.max()
     return np.linspace(m, M, n_bins + 1)    
 
 def get_bin_coordinates(x_values, col_indices = None, bins_per_var = 10):
+    '''Get the bin coordinates for a set of values
 
+    Parameters
+    ----------
+    x_values : np.array
+        The values to bin
+    col_indices : index-like or None (default None)
+        The column indices to use for finding bin values
+    bins_per_var : int (default 10)
+        The number of bins per variable to create
+
+    Returns
+    -------
+    bins : numpy array
+        Array of the bin values, shape (n_bins, n_cols)
+    '''
     if len(x_values.shape) == 1:
         return _single_col_bin(x_values, bins_per_var)
 
@@ -83,7 +186,27 @@ def get_bin_coordinates(x_values, col_indices = None, bins_per_var = 10):
     return np.apply_along_axis(_single_col_bin, 0, subset, n_bins = bins_per_var)
 
 def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bins_per_var = 10):
-    
+    '''Get the approximate bin surface coordinates for the surface function
+
+    Parameters
+    ----------
+    x_values : numpy array
+        The values to bin
+    y_values : numpy array
+        The target values
+    bin_col_indices : index-like
+        Columns to use for binning
+    target_col_index : int
+        The column to use in for splitting
+    bins_per_var : int (default 10)
+        The number of bins to use per variable
+
+    Returns
+    -------
+    surface_coords : np.array
+        The surface coordinates
+    '''
+
     #raw_bin_coords is an array of coordinates
     raw_bin_coords = get_bin_coordinates(x_values, bin_col_indices, bins_per_var)
 
