@@ -296,21 +296,60 @@ def create_surface_function(surface_coords, column_names, highest_degree = 1, fi
             for degree in range(2, highest_degree + 1):
                 surface_coords[f'{col}**{degree}'] = surface_coords[col]**degree
 
+    # separate the column to predict from the columns to predict from
     to_predict = surface_coords[column_names[-1]]
     predict_from = surface_coords[[col for col in surface_coords.columns.tolist() if col != column_names[-1]]]
 
+    # fit the model and get the coefficients
     model.fit(predict_from.values, to_predict.values)
     coefs = model.coef_
-    
+
+    # configure the return function and return it
     ret_function = ' + '.join([f'{coefs[i]}*{predict_from.columns[i]}' for i in range(coefs.shape[0])]) 
     ret_function += f' - {column_names[-1]}'
     return ret_function.replace('**','^')
 
 def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree = 1, fit_intercept = True, method = 'ols', n_bins = 10, **kwargs):
+    '''Find the best split on data using LRCT methods
+
+    Parameters
+    ----------
+    x_values : pandas DataFrame
+        A DataFrame of values to use to predict from
+    y_values : 1d numpy array
+        The target values to predict
+    num_independent : int (default 1)
+        Number of variables to use as independent variables in LRCT surface learning
+    highest_degree : int (default 1)
+        The highest degree to take independent variables to
+    fit_intercept : bool (default True)
+        Whether to fit intercepts in the linear regressions that are trained
+    method : str (default 'ols')
+        One of 'ols', 'ridge', and 'lasso' -- the method of linear regression to use
+    n_bins : int (default 10)
+        The number of bins to use per independent variable in determining surface coordinates
+    **kwargs : additional arguments
+        Additional arguments to pass to the linear regression model, if desired
+
+    Notes
+    -----
+    - Returns np.nan if no best split can be found
+
+    Returns
+    -------
+    split_info : tuple
+        A tuple of the form (column name, split_value)
+    '''
+
+    # separate columns from the values
     cols = x_values.columns.tolist()
     x_numpy = x_values.values
     x_copy = x_values.copy()
+
+    # get the combinations of columns that we will use
     all_indices = combinations(range(len(cols)), num_independent + 1)
+
+    # get all of the surface coordinates fo each of the combinations of columns to determine the coordinates from
     for ind in all_indices:
         surface_coords = get_surface_coords(
             x_numpy,
