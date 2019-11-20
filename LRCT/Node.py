@@ -1,7 +1,7 @@
 import numpy as np
 
 class Node:
-
+    '''A Node object to be used inside a Tree object as a splitting point'''
     def __init__(
         self,
         identifier = 0,
@@ -9,6 +9,18 @@ class Node:
         depth = 0,
         split = np.nan,
     ):
+        '''
+        Parameters
+        ----------
+        identifier : int (default 0)
+            The ID of the Node
+        parent_id : int or None (default None)
+            The ID of the parent Node
+        depth : int (default 0)
+            The depth the Node resides at in the Tree
+        split : tuple of length 2 or np.nan (default np.nan)
+            The spilt made at the Node
+        '''
         self.identifier = identifier
         self.parent_id = parent_id
         self.depth = depth

@@ -367,7 +367,7 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
                 method = method,
                 **kwargs
             )
-
+            # parse the surface function
             rest, last_col = surface_function.split(' - ')[0], surface_function.split(' - ')[1]
             new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
             new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
@@ -378,12 +378,20 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
                     new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
                 else:
                     new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
+
+            # rewrite the surface function so that it works as `eval`
             new_col_str = ' + '.join(new_col_components)
             new_col_str += f' - x_values["{last_col}"]'
+
+            # create a new function using the surface function
             x_copy[surface_function] = eval(new_col_str)
         except ValueError:
             pass
+
+    # now just find the best split using traditional methods
     split_info = find_best_split(x_copy, y_values)
+
+    # returns split info or nan if the split info gives nothing
     if split_info is np.nan:
         return split_info
     else:
