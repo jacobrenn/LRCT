@@ -78,4 +78,5 @@ class Node:
         self._split = value
 
     def describe(self):
+        '''Print a description of the Node'''
         print(self.__repr__())
