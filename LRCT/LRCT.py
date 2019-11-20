@@ -7,7 +7,13 @@ from sklearn.metrics import accuracy_score
 import warnings
 
 class LRCTree:
+    '''Linear Regression Classification Tree
 
+    LRCT serves as an improved classification tree capable of making multivariate
+    linear and nonlinear splits in its training.  It does this by approximating the
+    optimal surface function across multiple variables by applying binning and linear
+    regression.
+    '''
     def __init__(
         self,
         max_depth = None,
@@ -20,6 +26,33 @@ class LRCTree:
         n_bins = 10,
         **kwargs
     ):
+        '''
+        Parameters
+        ----------
+        max_depth : int or None (default None)
+            The maximum depth the Tree can train to. If None, does not use
+            depth as a stopping criteria
+        min_samples_split : int (default 2)
+            The minimum number of samples that have to be at a Node to make
+            a split
+        min_samples_leaf : int (default 1)
+            The minimum number of samples that have to be at a leaf Node
+        n_independent : int (default 1)
+            The number of independent variables to use per multivariate split.
+            This value can be set to 0, which will result in CART
+        highest_degree : int (default 1)
+            The highest degree to which to raise the independent variables
+            in surface function learning
+        fit_intercepts : bool (default True)
+            Whether to fit intercepts in linear regression models
+        method : str (default 'ols')
+            One of 'ols', 'ridge', or 'lasso', the type of regression model to
+            fit
+        n_bins : int (default 10)
+            The number of bins to use per independent variable in training
+        **kwargs : additional keyword arguments
+            Additional keyword arguments to pass to the linear regression models
+        '''
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
@@ -159,13 +192,36 @@ class LRCTree:
                 self._nodes[node.identifier] = node
 
     def describe(self):
+        '''Print a description of the Tree'''
         if self._nodes == {}:
             print('Empty Tree')
         else:
             print('\n'.join([f'{"-"*n.depth}{n}' for n in self._nodes.values()]))
 
     def _split_node(self, node_id, x_data, y_data):
+        '''Split a Node as in training
         
+        Parameters
+        ----------
+        node_id : int
+            The identifier of the Node to split
+        x_data : pandas DataFrame
+            The data to train from
+        y_data : array-like
+            The target values
+
+        Notes
+        -----
+        - If a split is found, alters the Tree by adding Nodes and altering the split of the Node
+        being split
+
+        Returns
+        -------
+        split_info : tuple
+            Tuple of the form (less_node_id, greater_node_id, less_x, greater_x, less_y, greater_y)
+        None : NoneType
+            If no split is found
+        '''
         #if x_data does not have more than min_samples_split rows or y_data has only one unique value, do nothing
         if x_data.shape[0] < self.min_samples_split or np.unique(y_data).shape[0] == 1:
             return None
@@ -198,6 +254,7 @@ class LRCTree:
         else:
             split_col, split_value = split_info
 
+        #if split_col is not one of the original columns, must be LRCT column -- parse and create
         if split_col not in x_copy.columns:
             rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
             new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
@@ -216,9 +273,11 @@ class LRCTree:
         else:
             split_col_values = x_copy[split_col]
 
+        #create indices for both sides of the split
         less_idx = split_col_values <= split_value
         greater_idx = split_col_values > split_value
 
+        #create the new Nodes
         less_node = Node(
             highest_id + 1,
             parent_id,
@@ -230,9 +289,11 @@ class LRCTree:
             parent_depth + 1
         )
         
+        #check for stopping conditions
         if (less_idx.sum() < self.min_samples_leaf) or (greater_idx.sum() < self.min_samples_leaf):
             return None
         
+        #if we've gotten here, we're good to go -- add the Nodes and return pertinent info
         self._add_nodes([less_node, greater_node])
         self._nodes[parent_id].split = split_info
         return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
