@@ -171,20 +171,33 @@ class LRCTree:
         return [n for n in self._nodes.values()]
     
     def _add_nodes(self, nodes):
-        
+        '''Add Nodes to the Tree
+
+        Parameters
+        ----------
+        Nodes : Node or list of Nodes
+            Nodes to add to the Tree
+
+        Notes
+        -----
+        - Raises ValueError if Node is passed with identifier that already exists in Tree
+        '''
         is_node = isinstance(nodes, Node)
         acceptable_list = isinstance(nodes, list) and all([isinstance(n, Node) for n in nodes])
         
         if not (is_node or acceptable_list):
             raise ValueError('adding nodes requires Node objects or list of Node objects')
 
+        # figure out the existing IDs
         existing_ids = [id for id in self._nodes.keys()]
-        
+
+        # value checking for existing IDs
         if is_node and nodes.identifier in existing_ids:
             raise ValueError('Node with that ID already exists')
         if acceptable_list and any([n.identifier in existing_ids for n in nodes]):
             raise ValueError('Trying to set Node with existing ID')
-        
+
+        # do the actual adding of Node(s)
         if is_node:
             self._nodes[nodes.identifier] = nodes
         elif acceptable_list:
@@ -226,8 +239,10 @@ class LRCTree:
         if x_data.shape[0] < self.min_samples_split or np.unique(y_data).shape[0] == 1:
             return None
 
+        #make a copy of X and work with that 
         x_copy = x_data.copy()
-        
+
+        #get the node, the prospective parent id, and the prospective parent depth
         node = self._nodes[node_id]
         parent_id = node.identifier
         parent_depth = node.depth
@@ -238,6 +253,7 @@ class LRCTree:
         
         highest_id = max(self._nodes.keys())
 
+        #find the split information
         split_info = find_best_lrct_split(
             x_copy,
             y_data,
@@ -299,7 +315,22 @@ class LRCTree:
         return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
 
     def fit(self, x, y):
+        '''Fit the Tree
 
+        Parameters
+        ----------
+        x : pandas DataFrame
+            The independent data to learn from
+        y : 1d numpy array or pandas Series
+            The target to learn
+
+        Returns
+        -------
+        tree : LRCTree
+            The fit tree (self)
+        '''
+
+        # typechecking
         if self._is_fit:
             raise AlreadyFitError
         if not isinstance(x, pd.DataFrame):
@@ -311,9 +342,14 @@ class LRCTree:
         if self._nodes != {}:
             raise ValueError('Tree already has nodes.  Must fit tree with no nodes')
 
+        # if y is pandas Series, use only values (numpy array)
+        if isinstance(y, pd.Series):
+            y = y.values
+        
         # add the parent Node
         self._add_nodes(Node())
 
+        # keep a record of all Node data for record keeping -- will be lost at the end however
         node_data = {
                 0 : {
                     'x' : x,
@@ -321,13 +357,22 @@ class LRCTree:
                 }
             }
 
+        # fitting logic is inside while loop
         while self.depth < self.max_depth:
+
+            # record current depth Nodes and how many Nodes exist to determine stopping criteria later
             current_depth_nodes = [n for n in self.nodes if n.depth == self.depth]
             num_nodes = len(self.nodes)
-            
+
+            # try to split all of the current depth Nodes
             for n in current_depth_nodes:
                 split_results = self._split_node(n.identifier, node_data[n.identifier]['x'], node_data[n.identifier]['y'])
+
+                # get the split information if there is an actual split to get
+                # remember -- if split_results is not None, the Node was actually split and new Nodes were added to the Tree
                 if split_results is not None:
+
+                    # get the data for each side
                     less_id = split_results[0]
                     greater_id = split_results[1]
                     x_less = split_results[2]
@@ -335,32 +380,63 @@ class LRCTree:
                     y_less = split_results[4]
                     y_greater = split_results[5]
 
+                    # create the Nodes
                     node_data[less_id] = {
                         'x' : x_less,
                         'y' : y_less
                     }
-
                     node_data[greater_id] = {
                         'x' : x_greater,
                         'y' : y_greater
                     }
+
+            # if no new Nodes, then we are done
             new_num_nodes = len(self.nodes)
             if new_num_nodes == num_nodes:
                 break
-        
+
+        # set _is_fit to True
         self._is_fit = True
+
+        # _values_to_predict helps with predicting probabilities
         self._values_to_predict = np.unique(y)
+
+        # _node_distributions helps with predicting
         self._node_distributions = {
             n.identifier : np.array([(node_data[n.identifier]['y'] == i).sum() for i in self._values_to_predict])
             for n in self.nodes if n.split is np.nan
         }
+
+        # return self for consistency with scikit-learn
         return self
 
     def _predict_single_instance(self, instance):
+        '''Predict a single new instance
+
+        Parameters
+        ----------
+        instance : pd.Series or dict
+            Object which has the desired implementation of the .keys() method
+
+        Returns
+        -------
+        prediction : int
+            The class predicted
+        '''
+
+        # start at the root Node
         current_node = self._nodes[0]
+
+        # continue until at a leaf Node (split is np.nan)
         while not (current_node.split is np.nan):
+
+            # figure out the child IDs
             child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
+            # get the split column and the split value
             split_col, split_value = current_node.split
+
+            # if the column is not in the default keys, it must be a multivariate split
+            # if so, construct the column that you want
             if split_col not in instance.keys():
                 rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
                 new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
@@ -375,22 +451,47 @@ class LRCTree:
                 new_col_str = ' + '.join(new_col_components)
                 new_col_str += f' - instance["{last_col}"]'
                 val_to_check = eval(new_col_str)
+
+            # the else case is easy
             else:
                 val_to_check = instance[split_col]
 
+            # we always know that the Node corresponding to split_col < split_val is made first
+            # hence, it has the lower ID and the Node corresponding to split_col > split_val has the
+            # higher ID
             if val_to_check <= split_value:
                 new_node_id = min(child_node_ids)
             else:
                 new_node_id = max(child_node_ids)
             current_node = self._nodes[new_node_id]
-        
+
+        # after we're out of the while loop, get the current distribution to see what we need to predict
         current_distribution = self._node_distributions[current_node.identifier]
+
+        # if we have a clear winner (highest vote), predict that
         if current_distribution.min() != current_distribution.max():
             return current_distribution.argmax()
+
+        # else, predict a random value
         else:
             return np.random.choice(self._values_to_predict.shape[0])
 
     def _predict_single_proba(self, instance):
+        '''Predict class probabilities for a single instance
+
+        Parameters
+        ----------
+        instance : pd.Series or dict
+            Object which has the desired implementation of the .keys() method
+
+        Returns
+        -------
+        probas : numpy array
+            Array of shape (n_classes,), where n_classes is the number of classes trained on
+        '''
+
+        # implementation of this function is similar to the implementation of _predict_single_instance
+        # except return the node distributions normalized to sum to 1
         current_node = self._nodes[0]
         while not (current_node.split is np.nan):
             child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
@@ -421,22 +522,76 @@ class LRCTree:
         return self._node_distributions[current_node.identifier] / self._node_distributions[current_node.identifier].sum()
 
     def predict(self, x):
+        '''Predict classes for a set of values
+        
+        Parameters
+        ----------
+        x : pandas DataFrame
+            DataFrame to predict from
+
+        Returns
+        -------
+        preds : numpy array
+            Numpy array of predictions
+        '''
         if not self._is_fit:
             raise NotFitError
-        
+
+        # this function just applies the _predict_single_instance method to each of the rows
         return x.apply(lambda row : self._predict_single_instance(row), axis = 1).values
 
     def predict_proba(self, x):
+        '''Predict class probabilities for a set of values
+
+        Parameters
+        ----------
+        x : pandas DataFrame
+            DataFrame to predict from
+        
+        Returns
+        -------
+        preds : numpy array
+            Numpy array of predicted probabilities. Column indices correspond to same classes
+        '''
         if not self._is_fit:
             raise NotFitError
 
+        # this function just applies the _predictsingle_proba method
         probs = x.apply(lambda row : self._predict_single_proba(row), axis = 1).values
         return np.array([p.tolist() for p in probs])
 
     def score(self, x, y):
+        '''Score the model's performance on new labeled data using accuracy score as a measure
+
+        Parameters
+        ----------
+        x : pandas DataFrame
+            DataFrame to predict from
+        y : pandas Series or 1d numpy array
+            Labels for data
+        
+        Returns
+        -------
+        score : float
+            Accuracy score of the model on its predictions of x
+        '''
         preds = self.predict(x)
         return accuracy_score(y, preds)
 
     def fit_predict(self, x, y):
+        '''Fit the model and predict on X
+
+        Parameters
+        ----------
+        x : pandas DataFrame
+            DataFrame to train on and predict from
+        y : pandas Series or 1d numpy array
+            Labels for x to learn from
+
+        Returns
+        -------
+        preds : 1d numpy array
+            Predictions on x after fitting
+        '''
         self.fit(x, y)
         return self.predict(x)
