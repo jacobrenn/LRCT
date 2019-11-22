@@ -1,6 +1,6 @@
 from LRCT.splitting_functions import find_best_split, find_best_lrct_split
 from LRCT.Node import Node
-from LRCT.Exceptions import AlreadyFitError, NotFitError
+from LRCT.Exceptions import NotFitError
 
 import numpy as np
 import pandas as pd
@@ -68,7 +68,6 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         self.kwargs = kwargs
 
         self._nodes = {}
-        self._is_fit = False
 
     @property
     def depth(self):
@@ -172,7 +171,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
     @property
     def nodes(self):
-        return [n for n in self._nodes.values()]
+        try:
+            return [n for n in self._nodes.values()]
+        except:
+            raise NotFitError()
     
     def _add_nodes(self, nodes):
         '''Add Nodes to the Tree
@@ -333,10 +335,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         tree : LRCTree
             The fit tree (self)
         '''
-
+        
         # typechecking
-        if self._is_fit:
-            raise AlreadyFitError
         if not isinstance(x, pd.DataFrame):
             raise TypeError('x must be pandas DataFrame')
         if not isinstance(y, (np.ndarray, pd.Series)):
@@ -353,7 +353,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         # if y is pandas Series, use only values (numpy array)
         if isinstance(y, pd.Series):
             y = y.values
-        
+
+        # instantiate the Nodes
+        self._nodes = {}
+            
         # add the parent Node
         self._add_nodes(Node())
 
