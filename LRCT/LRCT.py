@@ -343,8 +343,6 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             raise TypeError('y must be ndarray or Series')
         if len(y.shape) != 1:
             raise ValueError('y must have a single dimension')
-        if self._nodes != {}:
-            raise ValueError('Tree already has nodes.  Must fit tree with no nodes')
 
         # check the shapes of each variable
         if x.shape[0] != y.shape[0]:
@@ -414,7 +412,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         # _node_distributions helps with predicting
         self.node_distributions_ = {
-            n.identifier : np.array([(node_data[n.identifier]['y'] == i).sum() for i in self._values_to_predict])
+            n.identifier : np.array([(node_data[n.identifier]['y'] == i).sum() for i in self.values_to_predict_])
             for n in self.nodes if n.split is np.nan
         }
 
