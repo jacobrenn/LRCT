@@ -346,6 +346,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         if self._nodes != {}:
             raise ValueError('Tree already has nodes.  Must fit tree with no nodes')
 
+        # check the shapes of each variable
+        if x.shape[0] != y.shape[0]:
+            raise ValueError('Number of records does not match number of samples')
+        
         # if y is pandas Series, use only values (numpy array)
         if isinstance(y, pd.Series):
             y = y.values
