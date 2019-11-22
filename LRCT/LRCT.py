@@ -407,10 +407,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         self._is_fit = True
 
         # _values_to_predict helps with predicting probabilities
-        self._values_to_predict = np.unique(y)
+        self.values_to_predict_ = np.unique(y)
 
         # _node_distributions helps with predicting
-        self._node_distributions = {
+        self.node_distributions_ = {
             n.identifier : np.array([(node_data[n.identifier]['y'] == i).sum() for i in self._values_to_predict])
             for n in self.nodes if n.split is np.nan
         }
@@ -474,7 +474,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             current_node = self._nodes[new_node_id]
 
         # after we're out of the while loop, get the current distribution to see what we need to predict
-        current_distribution = self._node_distributions[current_node.identifier]
+        current_distribution = self.node_distributions_[current_node.identifier]
 
         # if we have a clear winner (highest vote), predict that
         if current_distribution.min() != current_distribution.max():
@@ -482,7 +482,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         # else, predict a random value
         else:
-            return np.random.choice(self._values_to_predict.shape[0])
+            return np.random.choice(self.values_to_predict_.shape[0])
 
     def _predict_single_proba(self, instance):
         '''Predict class probabilities for a single instance
@@ -527,7 +527,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
                 new_node_id = max(child_node_ids)
             current_node = self._nodes[new_node_id]
         
-        return self._node_distributions[current_node.identifier] / self._node_distributions[current_node.identifier].sum()
+        return self.node_distributions_[current_node.identifier] / self.node_distributions_[current_node.identifier].sum()
 
     def predict(self, x):
         '''Predict classes for a set of values
