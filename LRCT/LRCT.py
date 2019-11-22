@@ -1,12 +1,16 @@
 from LRCT.splitting_functions import find_best_split, find_best_lrct_split
 from LRCT.Node import Node
 from LRCT.Exceptions import AlreadyFitError, NotFitError
+
 import numpy as np
 import pandas as pd
+
 from sklearn.metrics import accuracy_score
+from sklearn.base import BaseEstimator, ClassifierMixin
+
 import warnings
 
-class LRCTree:
+class LRCTree(BaseEstimator, ClassifierMixin):
     '''Linear Regression Classification Tree
 
     LRCT serves as an improved classification tree capable of making multivariate
