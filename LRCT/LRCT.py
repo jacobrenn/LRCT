@@ -83,7 +83,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     def max_depth(self, value):
         nn = value is not None
         if not isinstance(value, int) and nn:
-            raise TypeError('max_depth must be int')
+            raise TypeError(f'max_depth must be int, got type {type(value)}')
         if nn and value <= 0:
             raise ValueError('max_depth must be greater than 0')
         self._max_depth = value
