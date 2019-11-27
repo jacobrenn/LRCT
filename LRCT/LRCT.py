@@ -82,8 +82,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @max_depth.setter
     def max_depth(self, value):
         nn = value is not None
-        if not isinstance(value, int) and nn:
-            raise TypeError(f'max_depth must be int, got type {type(value)}')
+        if not (value == int(value)) and nn:
+            raise ValueError(f'max_depth must be integer-valued, got {value}')
         if nn and value <= 0:
             raise ValueError('max_depth must be greater than 0')
         self._max_depth = value
@@ -93,8 +93,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return self._min_samples_split
     @min_samples_split.setter
     def min_samples_split(self, value):
-        if not isinstance(value, int):
-            raise TypeError('min_samples_split must be int')
+        if not value == int(value):
+            raise ValueError('min_samples_split must be integer-valued')
         if value < 2:
             raise ValueError('Minimum value for min_samples_split must be 2')
         self._min_samples_split = value
@@ -104,8 +104,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return self._min_samples_leaf
     @min_samples_leaf.setter
     def min_samples_leaf(self, value):
-        if not isinstance(value, int):
-            raise TypeError('min_samples_leaf must be int')
+        if not value == int(value):
+            raise TypeError('min_samples_leaf must be integer-valued')
         if value <= 0:
             raise ValueError('min_samples_leaf must be greater than 0')
         self._min_samples_leaf = value
@@ -115,8 +115,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return self._n_independent
     @n_independent.setter
     def n_independent(self, value):
-        if not isinstance(value, int):
-            raise TypeError('n_independent must be int')
+        if not value == int(value):
+            raise TypeError('n_independent must be integer-valued')
         if value < 0:
             raise ValueError('n_independent must be nonnegative')
         if value == 0:
@@ -128,7 +128,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return self._highest_degree
     @highest_degree.setter
     def highest_degree(self, value):
-        if not isinstance(value, int):
+        if not value == int(value):
             raise TypeError('LRCT currently supports integer-valued highest degrees')
         self._highest_degree = value
 
@@ -156,8 +156,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return self._n_bins
     @n_bins.setter
     def n_bins(self, value):
-        if not isinstance(value, int):
-            raise TypeError('n_bins must be int')
+        if not value == int(value):
+            raise TypeError('n_bins must be integer-valued')
         if value <= 1:
             raise ValueError('n_bins must be greater than or equal to 0')
         self._n_bins = value
