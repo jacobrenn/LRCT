@@ -406,8 +406,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         # start at the root Node
         current_node = self._nodes[0]
 
-        # continue until at a leaf Node (split is np.nan)
-        while not (current_node.split is np.nan):
+        # continue until at a leaf Node (split is np.nan == float, not tuple)
+        while isinstance(current_node.split, tuple):
 
             # figure out the child IDs
             child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
@@ -472,7 +472,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         # implementation of this function is similar to the implementation of _predict_single_instance
         # except return the node distributions normalized to sum to 1
         current_node = self._nodes[0]
-        while not (current_node.split is np.nan):
+
+        while isinstance(current_node.split, tuple):
             child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
             split_col, split_value = current_node.split
             if split_col not in instance.keys():
