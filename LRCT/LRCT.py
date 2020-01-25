@@ -10,27 +10,29 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 
 import warnings
 
+
 class LRCTree(BaseEstimator, ClassifierMixin):
-    '''Linear Regression Classification Tree
+    """Linear Regression Classification Tree
 
     LRCT serves as an improved classification tree capable of making multivariate
     linear and nonlinear splits in its training.  It does this by approximating the
     optimal surface function across multiple variables by applying binning and linear
     regression.
-    '''
+    """
+
     def __init__(
-        self,
-        max_depth = None,
-        min_samples_split = 2,
-        min_samples_leaf = 1,
-        n_independent = 1,
-        highest_degree = 1,
-        fit_intercepts = True,
-        method = 'ols',
-        n_bins = 10,
-        **kwargs
+            self,
+            max_depth=None,
+            min_samples_split=2,
+            min_samples_leaf=1,
+            n_independent=1,
+            highest_degree=1,
+            fit_intercepts=True,
+            method='ols',
+            n_bins=10,
+            **kwargs
     ):
-        '''
+        """
         Parameters
         ----------
         max_depth : int or None (default None)
@@ -56,7 +58,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             The number of bins to use per independent variable in training
         **kwargs : additional keyword arguments
             Additional keyword arguments to pass to the linear regression models
-        '''
+        """
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
@@ -79,13 +81,15 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def max_depth(self):
         return self._max_depth if self._max_depth else np.inf
+
     @max_depth.setter
     def max_depth(self, value):
         self._max_depth = value
-    
+
     @property
     def min_samples_split(self):
         return self._min_samples_split
+
     @min_samples_split.setter
     def min_samples_split(self, value):
         self._min_samples_split = value
@@ -93,13 +97,15 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def min_samples_leaf(self):
         return self._min_samples_leaf
+
     @min_samples_leaf.setter
     def min_samples_leaf(self, value):
         self._min_samples_leaf = value
-    
+
     @property
     def n_independent(self):
         return self._n_independent
+
     @n_independent.setter
     def n_independent(self, value):
         self._n_independent = value
@@ -107,6 +113,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def highest_degree(self):
         return self._highest_degree
+
     @highest_degree.setter
     def highest_degree(self, value):
         self._highest_degree = value
@@ -114,6 +121,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def fit_intercepts(self):
         return self._fit_intercepts
+
     @fit_intercepts.setter
     def fit_intercepts(self, value):
         self._fit_intercepts = value
@@ -121,6 +129,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def method(self):
         return self._method
+
     @method.setter
     def method(self, value):
         self._method = value
@@ -128,6 +137,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def n_bins(self):
         return self._n_bins
+
     @n_bins.setter
     def n_bins(self, value):
         self._n_bins = value
@@ -135,6 +145,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
     @property
     def kwargs(self):
         return self._kwargs
+
     @kwargs.setter
     def kwargs(self, value):
         self._kwargs = value
@@ -145,9 +156,9 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             return [n for n in self._nodes.values()]
         except:
             raise NotFitError()
-    
+
     def _add_nodes(self, nodes):
-        '''Add Nodes to the Tree
+        """Add Nodes to the Tree
 
         Parameters
         ----------
@@ -157,10 +168,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         Notes
         -----
         - Raises ValueError if Node is passed with identifier that already exists in Tree
-        '''
+        """
         is_node = isinstance(nodes, Node)
         acceptable_list = isinstance(nodes, list) and all([isinstance(n, Node) for n in nodes])
-        
+
         if not (is_node or acceptable_list):
             raise ValueError('adding nodes requires Node objects or list of Node objects')
 
@@ -181,15 +192,15 @@ class LRCTree(BaseEstimator, ClassifierMixin):
                 self._nodes[node.identifier] = node
 
     def describe(self):
-        '''Print a description of the Tree'''
+        """Print a description of the Tree"""
         if self._nodes == {}:
             print('Empty Tree')
         else:
-            print('\n'.join([f'{"-"*n.depth}{n}' for n in self._nodes.values()]))
+            print('\n'.join([f'{"-" * n.depth}{n}' for n in self._nodes.values()]))
 
     def _split_node(self, node_id, x_data, y_data):
-        '''Split a Node as in training
-        
+        """Split a Node as in training
+
         Parameters
         ----------
         node_id : int
@@ -210,26 +221,26 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             Tuple of the form (less_node_id, greater_node_id, less_x, greater_x, less_y, greater_y)
         None : NoneType
             If no split is found
-        '''
-        #if x_data does not have more than min_samples_split rows or y_data has only one unique value, do nothing
+        """
+        # if x_data does not have more than min_samples_split rows or y_data has only one unique value, do nothing
         if x_data.shape[0] < self.min_samples_split or np.unique(y_data).shape[0] == 1:
             return None
 
-        #make a copy of X and work with that 
+        # make a copy of X and work with that
         x_copy = x_data.copy()
 
-        #get the node, the prospective parent id, and the prospective parent depth
+        # get the node, the prospective parent id, and the prospective parent depth
         node = self._nodes[node_id]
         parent_id = node.identifier
         parent_depth = node.depth
-        
-        #do not continue if already at max depth
+
+        # do not continue if already at max depth
         if parent_depth == self.max_depth:
             return None
-        
+
         highest_id = max(self._nodes.keys())
 
-        #find the split information
+        # find the split information
         split_info = find_best_lrct_split(
             x_copy,
             y_data,
@@ -246,7 +257,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         else:
             split_col, split_value = split_info
 
-        #if split_col is not one of the original columns, must be LRCT column -- parse and create
+        # if split_col is not one of the original columns, must be LRCT column -- parse and create
         if split_col not in x_copy.columns:
             rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
             new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
@@ -265,11 +276,11 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         else:
             split_col_values = x_copy[split_col]
 
-        #create indices for both sides of the split
+        # create indices for both sides of the split
         less_idx = split_col_values <= split_value
         greater_idx = split_col_values > split_value
 
-        #create the new Nodes
+        # create the new Nodes
         less_node = Node(
             highest_id + 1,
             parent_id,
@@ -280,18 +291,19 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             parent_id,
             parent_depth + 1
         )
-        
-        #check for stopping conditions
+
+        # check for stopping conditions
         if (less_idx.sum() < self.min_samples_leaf) or (greater_idx.sum() < self.min_samples_leaf):
             return None
-        
-        #if we've gotten here, we're good to go -- add the Nodes and return pertinent info
-        self._add_nodes([less_node, greater_node])
+
+        # if we've gotten here, we're good to go -- add the Nodes and return pertinent info
+        self._add_nodes({less_node, greater_node})
         self._nodes[parent_id].split = split_info
-        return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
+        return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[
+            greater_idx]
 
     def fit(self, x, y):
-        '''Fit the Tree
+        """Fit the Tree
 
         Parameters
         ----------
@@ -304,8 +316,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         -------
         tree : LRCTree
             The fit tree (self)
-        '''
-        
+        """
+
         # typechecking
         if not isinstance(x, pd.DataFrame):
             raise TypeError('x must be pandas DataFrame')
@@ -317,24 +329,24 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         # check the shapes of each variable
         if x.shape[0] != y.shape[0]:
             raise ValueError('Number of records does not match number of samples')
-        
+
         # if y is pandas Series, use only values (numpy array)
         if isinstance(y, pd.Series):
             y = y.values
 
         # instantiate the Nodes
         self._nodes = {}
-            
+
         # add the parent Node
         self._add_nodes(Node())
 
         # keep a record of all Node data for record keeping -- will be lost at the end however
         node_data = {
-                0 : {
-                    'x' : x,
-                    'y' : y
-                }
+            0: {
+                'x': x,
+                'y': y
             }
+        }
 
         # fitting logic is inside while loop
         while self.depth < self.max_depth:
@@ -345,12 +357,13 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
             # try to split all of the current depth Nodes
             for n in current_depth_nodes:
-                split_results = self._split_node(n.identifier, node_data[n.identifier]['x'], node_data[n.identifier]['y'])
+                split_results = self._split_node(n.identifier, node_data[n.identifier]['x'],
+                                                 node_data[n.identifier]['y'])
 
                 # get the split information if there is an actual split to get
-                # remember -- if split_results is not None, the Node was actually split and new Nodes were added to the Tree
+                # remember -- if split_results is not None, the Node was actually split and new Nodes were added to the
+                # Tree
                 if split_results is not None:
-
                     # get the data for each side
                     less_id = split_results[0]
                     greater_id = split_results[1]
@@ -361,12 +374,12 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
                     # create the Nodes
                     node_data[less_id] = {
-                        'x' : x_less,
-                        'y' : y_less
+                        'x': x_less,
+                        'y': y_less
                     }
                     node_data[greater_id] = {
-                        'x' : x_greater,
-                        'y' : y_greater
+                        'x': x_greater,
+                        'y': y_greater
                     }
 
             # if no new Nodes, then we are done
@@ -382,7 +395,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         # _node_distributions helps with predicting
         self.node_distributions_ = {
-            n.identifier : np.array([(node_data[n.identifier]['y'] == i).sum() for i in self.values_to_predict_])
+            n.identifier: np.array([(node_data[n.identifier]['y'] == i).sum() for i in self.values_to_predict_])
             for n in self.nodes if n.split is np.nan
         }
 
@@ -390,7 +403,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return self
 
     def _predict_single_instance(self, instance):
-        '''Predict a single new instance
+        """Predict a single new instance
 
         Parameters
         ----------
@@ -401,7 +414,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         -------
         prediction : int
             The class predicted
-        '''
+        """
 
         # start at the root Node
         current_node = self._nodes[0]
@@ -456,7 +469,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             return np.random.choice(self.values_to_predict_.shape[0])
 
     def _predict_single_proba(self, instance):
-        '''Predict class probabilities for a single instance
+        """Predict class probabilities for a single instance
 
         Parameters
         ----------
@@ -467,7 +480,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         -------
         probas : numpy array
             Array of shape (n_classes,), where n_classes is the number of classes trained on
-        '''
+        """
 
         # implementation of this function is similar to the implementation of _predict_single_instance
         # except return the node distributions normalized to sum to 1
@@ -498,8 +511,9 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             else:
                 new_node_id = max(child_node_ids)
             current_node = self._nodes[new_node_id]
-        
-        return self.node_distributions_[current_node.identifier] / self.node_distributions_[current_node.identifier].sum()
+
+        return self.node_distributions_[current_node.identifier] / self.node_distributions_[
+            current_node.identifier].sum()
 
     def predict(self, x):
         '''Predict classes for a set of values
@@ -518,7 +532,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             raise NotFitError
 
         # this function just applies the _predict_single_instance method to each of the rows
-        return x.apply(lambda row : self._predict_single_instance(row), axis = 1).values
+        return x.apply(lambda row: self._predict_single_instance(row), axis=1).values
 
     def predict_proba(self, x):
         '''Predict class probabilities for a set of values
@@ -537,7 +551,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             raise NotFitError
 
         # this function just applies the _predictsingle_proba method
-        probs = x.apply(lambda row : self._predict_single_proba(row), axis = 1).values
+        probs = x.apply(lambda row: self._predict_single_proba(row), axis=1).values
         return np.array([p.tolist() for p in probs])
 
     def score(self, x, y):
