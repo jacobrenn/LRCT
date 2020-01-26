@@ -294,7 +294,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             return None
 
         # if we've gotten here, we're good to go -- add the Nodes and return pertinent info
-        self._add_nodes({less_node, greater_node})
+        self._add_nodes([less_node, greater_node])
         self._nodes[parent_id].split = split_info
         return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[
             greater_idx]
