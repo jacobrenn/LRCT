@@ -1,15 +1,17 @@
 import numpy as np
 
+
 class Node:
-    '''A Node object to be used inside a Tree object as a splitting point'''
+    """A Node object to be used inside a Tree object as a splitting point"""
+
     def __init__(
-        self,
-        identifier = 0,
-        parent_id = None,
-        depth = 0,
-        split = np.nan,
+            self,
+            identifier=0,
+            parent_id=None,
+            depth=0,
+            split=np.nan,
     ):
-        '''
+        """
         Parameters
         ----------
         identifier : int (default 0)
@@ -20,7 +22,7 @@ class Node:
             The depth the Node resides at in the Tree
         split : tuple of length 2 or np.nan (default np.nan)
             The spilt made at the Node
-        '''
+        """
         self.identifier = identifier
         self.parent_id = parent_id
         self.depth = depth
@@ -28,12 +30,14 @@ class Node:
 
     def __str__(self):
         return f'ID: {self.identifier}, Parent ID: {self.parent_id}, Depth: {self.depth}, Split: {self.split}'
+
     def __repr__(self):
         return self.__str__()
 
     @property
     def identifier(self):
         return self._identifier
+
     @identifier.setter
     def identifier(self, value):
         if not isinstance(value, int):
@@ -41,10 +45,11 @@ class Node:
         if value < 0:
             raise ValueError('identifier must be greater than 0')
         self._identifier = value
-    
+
     @property
     def parent_id(self):
         return self._parent_id
+
     @parent_id.setter
     def parent_id(self, value):
         nn = value is not None
@@ -57,6 +62,7 @@ class Node:
     @property
     def depth(self):
         return self._depth
+
     @depth.setter
     def depth(self, value):
         if not isinstance(value, int):
@@ -68,6 +74,7 @@ class Node:
     @property
     def split(self):
         return self._split
+
     @split.setter
     def split(self, value):
         nn = value is not np.nan
@@ -78,5 +85,5 @@ class Node:
         self._split = value
 
     def describe(self):
-        '''Print a description of the Node'''
+        """Print a description of the Node"""
         print(self.__repr__())

@@ -1,14 +1,11 @@
-from LRCT.splitting_functions import find_best_split, find_best_lrct_split
-from LRCT.Node import Node
-from LRCT.Exceptions import NotFitError
-
 import numpy as np
 import pandas as pd
-
-from sklearn.metrics import accuracy_score
 from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.metrics import accuracy_score
 
-import warnings
+from LRCT.Exceptions import NotFitError
+from LRCT.Node import Node
+from LRCT.splitting_functions import find_best_lrct_split
 
 
 class LRCTree(BaseEstimator, ClassifierMixin):
@@ -516,8 +513,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             current_node.identifier].sum()
 
     def predict(self, x):
-        '''Predict classes for a set of values
-        
+        """Predict classes for a set of values
+
         Parameters
         ----------
         x : pandas DataFrame
@@ -527,7 +524,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         -------
         preds : numpy array
             Numpy array of predictions
-        '''
+        """
         if not self._is_fit:
             raise NotFitError
 
@@ -535,18 +532,18 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return x.apply(lambda row: self._predict_single_instance(row), axis=1).values
 
     def predict_proba(self, x):
-        '''Predict class probabilities for a set of values
+        """Predict class probabilities for a set of values
 
         Parameters
         ----------
         x : pandas DataFrame
             DataFrame to predict from
-        
+
         Returns
         -------
         preds : numpy array
             Numpy array of predicted probabilities. Column indices correspond to same classes
-        '''
+        """
         if not self._is_fit:
             raise NotFitError
 
@@ -555,7 +552,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         return np.array([p.tolist() for p in probs])
 
     def score(self, x, y):
-        '''Score the model's performance on new labeled data using accuracy score as a measure
+        """Score the model's performance on new labeled data using accuracy score as a measure
 
         Parameters
         ----------
@@ -563,17 +560,17 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             DataFrame to predict from
         y : pandas Series or 1d numpy array
             Labels for data
-        
+
         Returns
         -------
         score : float
             Accuracy score of the model on its predictions of x
-        '''
+        """
         preds = self.predict(x)
         return accuracy_score(y, preds)
 
     def fit_predict(self, x, y):
-        '''Fit the model and predict on X
+        """Fit the model and predict on X
 
         Parameters
         ----------
@@ -586,6 +583,6 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         -------
         preds : 1d numpy array
             Predictions on x after fitting
-        '''
+        """
         self.fit(x, y)
         return self.predict(x)
