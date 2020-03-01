@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 from itertools import product, combinations
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from numba import njit
 
+@njit
 def gini_impurity(values, weighted = False):
     '''Calculate the Gini impurity measure of a set of values
 
@@ -37,6 +39,7 @@ def gini_impurity(values, weighted = False):
         return (1 - np.array([((values == value).sum()/total_num)**2 for value in unique]).sum()) * total_num
     return 1 - np.array([((values == value).sum()/total_num)**2 for value in unique]).sum()
 
+@njit
 def _get_split_candidates(col):
     '''Return all candidates for splitting from a column, i.e. the midpoints 
     between all unique points in the column
@@ -62,6 +65,7 @@ def _get_split_candidates(col):
         return np.nan
     return np.array(list(zip(unique_sorted, unique_sorted[1:]))).mean(axis = 1)
 
+@njit
 def _split_candidate_results(x_col, y_values, candidate):
     '''Calculate the results of splitting a column on a single value
 
@@ -87,6 +91,7 @@ def _split_candidate_results(x_col, y_values, candidate):
     gini_greater = gini_impurity(y_values[~idxer], weighted = True)
     return (gini_less + gini_greater) / y_values.shape[0]
 
+@njit
 def _column_best_split(x_col, y_values):
     '''Calculate the best split for a column
 
