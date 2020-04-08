@@ -248,7 +248,6 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             self.n_bins,
             **self.kwargs
         )
-
         if split_info is np.nan:
             return None
         else:

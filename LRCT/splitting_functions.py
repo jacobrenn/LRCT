@@ -18,11 +18,12 @@ def gini_impurity(values, weighted = False):
     impurity : float
         The impurity score
     '''
+    # REMOVING TYPE CHECKING TO SPEED UP
     # type checking
-    if not isinstance(values, np.ndarray):
-        raise TypeError('values must be numpy array')
-    if len(values.shape) != 1:
-        raise ValueError('values have too many dimensions')
+    #if not isinstance(values, np.ndarray):
+    #    raise TypeError('values must be numpy array')
+    #if len(values.shape) != 1:
+    #    raise ValueError('values have too many dimensions')
 
     # so these numbers don't have to be calculated multiple times
     total_num = values.shape[0]
@@ -131,8 +132,8 @@ def find_best_split(x_values, y_values):
 
     Returns
     -------
-    split_results : np.array
-        Array of the form [column, split_value] for the best split
+    split_results : tuple
+        Tuple of the form (column_index, split_value) for the best split
     '''
     if np.unique(y_values).shape[0] == 1:
         return np.nan
@@ -155,8 +156,11 @@ def find_best_split(x_values, y_values):
 
 def _single_col_bin(col, n_bins = 10):
     '''Bin a single column'''
-    m, M = col.min(), col.max()
-    return np.linspace(m, M, n_bins + 1)    
+    return np.linspace(
+        col.min(),
+        col.max(),
+        n_bins + 1
+    )
 
 def get_bin_coordinates(x_values, col_indices = None, bins_per_var = 10):
     '''Get the bin coordinates for a set of values
@@ -179,7 +183,7 @@ def get_bin_coordinates(x_values, col_indices = None, bins_per_var = 10):
         return _single_col_bin(x_values, bins_per_var)
 
     if col_indices is None:
-        return np.apply_along_axis(_single_col_bin, 0, x_values, n_bins = bins_per_var)
+        col_indices = np.arange(x_values.shape[1])
     
     subset = x_values[:, col_indices]
     return np.apply_along_axis(_single_col_bin, 0, subset, n_bins = bins_per_var)
@@ -287,6 +291,8 @@ def create_surface_function(surface_coords, column_names, highest_degree = 1, fi
     else:
         raise ValueError(f'Accepted values for `mathod` are `ols`, `ridge`, and `lasso`, got {method}')
 
+    ### THIS PART CAN BE IMPROVED SIGNIFICANTLY -- I SUSPECT THIS IS WHERE WE GET OUR SLOW PERFORMANCE PROBLEMS
+
     # get the DataFrame for the surface coordinates
     surface_coords = pd.DataFrame(surface_coords, columns = column_names)
 
@@ -308,6 +314,8 @@ def create_surface_function(surface_coords, column_names, highest_degree = 1, fi
     ret_function = ' + '.join([f'{coefs[i]}*{predict_from.columns[i]}' for i in range(coefs.shape[0])]) 
     ret_function += f' - {column_names[-1]}'
     return ret_function.replace('**','^')
+
+    ### END PROBLEMATIC PART
 
 def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree = 1, fit_intercept = True, method = 'ols', n_bins = 10, **kwargs):
     '''Find the best split on data using LRCT methods
