@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score
 
 from LRCT.Exceptions import NotFitError
 from LRCT.Node import Node
-from LRCT.splitting_functions import find_best_lrct_split
+from LRCT.splitting_functions import find_best_lrct_split, find_best_split
 
 
 class LRCTree(BaseEstimator, ClassifierMixin):
@@ -202,7 +202,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         ----------
         node_id : int
             The identifier of the Node to split
-        x_data : pandas DataFrame
+        x_data : 2d array-like
             The data to train from
         y_data : array-like
             The target values
@@ -238,7 +238,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         highest_id = max(self._nodes.keys())
 
         # find the split information
-        split_info = find_best_lrct_split(
+        best_traditional_split = find_best_split(x_copy, y_data)
+        best_lrct_split = find_best_lrct_split(
             x_copy,
             y_data,
             self.n_independent,
@@ -248,6 +249,40 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             self.n_bins,
             **self.kwargs
         )
+
+        if best_traditional_split['split_gini'] <= best_lrct_split['split_gini']:
+            split = best_traditional_split
+        else:
+            split = best_lrct_split
+
+        if split.get('col_idx'):
+            less_idx = x_copy[:, split.get('col_idx')] <= split.get('split_value')
+            greater_idx = x_copy[:, split.get('col_idx')] > split.get('split_value')
+        else:
+            ind = split['indices']
+            new_col = np.zeros(x_copy.shape[0])
+            for i in range(split['coefs'].shape[0]):
+                column_idx = ind[i % (len(ind) - 1)]
+                power = (i // (len(ind) - 1)) + 1
+                new_col += split['coefs'][i]*x_copy[:, column_idx]**power
+            new_col -= x_copy[:, ind[-1]]
+            less_idx = new_col <= split.get('split_value')
+            greater_idx = new_col > split.get('split_value')
+
+            less_node = Node(
+                highest_id + 1,
+                parent_id,
+                parent_depth + 1
+            )
+            greater_node = Node(
+                highest_id + 2,
+                parent_id,
+                parent_depth + 1
+            )
+            
+
+        # OLD STUFF BELOW HERE
+
         if split_info is np.nan:
             return None
         else:
@@ -276,6 +311,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         less_idx = split_col_values <= split_value
         greater_idx = split_col_values > split_value
 
+        # check for stopping condition
+        if (less_idx.sum() < self.min_samples_leaf) or (greater_idx.sum() < self.min_samples_leaf):
+            return None
+
         # create the new Nodes
         less_node = Node(
             highest_id + 1,
@@ -288,15 +327,19 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             parent_depth + 1
         )
 
+        # add the Nodes and return everything pertinent
+        self._add_nodes([less_node, greater_node])
+        self._nodes[parent_id].split = split
+        return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
+
         # check for stopping conditions
-        if (less_idx.sum() < self.min_samples_leaf) or (greater_idx.sum() < self.min_samples_leaf):
-            return None
+        #if (less_idx.sum() < self.min_samples_leaf) or (greater_idx.sum() < self.min_samples_leaf):
+        #    return None
 
         # if we've gotten here, we're good to go -- add the Nodes and return pertinent info
-        self._add_nodes([less_node, greater_node])
-        self._nodes[parent_id].split = split_info
-        return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[
-            greater_idx]
+        #self._add_nodes([less_node, greater_node])
+        #self._nodes[parent_id].split = split_info
+        #return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
 
     def fit(self, x, y):
         """Fit the Tree
@@ -315,7 +358,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         """
 
         # typechecking
-        if not isinstance(x, pd.DataFrame):
+        if not isinstance(x, (np.ndarray, pd.DataFrame)):
             raise TypeError('x must be pandas DataFrame')
         if not isinstance(y, (np.ndarray, pd.Series)):
             raise TypeError('y must be ndarray or Series')

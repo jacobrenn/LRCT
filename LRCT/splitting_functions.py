@@ -374,7 +374,7 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
             # get the new column and determine the split
             new_col = np.zeros(x_copy.shape[0])
             for i in range(surface_coefs.shape[0]):
-                column_idx = ind[i % len(ind) - 1]
+                column_idx = ind[i % (len(ind) - 1)]
                 power = (i // (len(ind) - 1)) + 1
                 new_col += surface_coefs[i]*x_copy[:,column_idx]**power
             new_col -= x_copy[:, ind[-1]]

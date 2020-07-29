@@ -78,10 +78,8 @@ class Node:
     @split.setter
     def split(self, value):
         nn = value is not np.nan
-        if not isinstance(value, tuple) and nn:
-            raise TypeError('split must be tuple or np.nan')
-        if nn and len(value) != 2:
-            raise ValueError('split must be tuple of length 2 or np.nan')
+        if not isinstance(value, dict) and nn:
+            raise TypeError('split must be dict or np.nan')
         self._split = value
 
     def describe(self):
