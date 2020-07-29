@@ -146,11 +146,20 @@ def find_best_split(x_values, y_values):
         y_values = y_values
     )
 
+    best_split = {
+        'col_idx' : None,
+        'split_value' : None,
+        'split_gini' : 1
+    }
+
     if split_results[1, :].min() == np.inf:
-        return np.nan
+        return best_split
 
     col_num = split_results[1, :].argmin()
-    return (col_num, split_results[0, col_num])
+    best_split['col_idx'] = col_num
+    best_split['split_value'] = split_results[0, col_num]
+    best_split['split_gini'] = split_results[1, col_num]
+    return best_split
 
 def _single_col_bin(col, n_bins = 10):
     '''Bin a single column'''
@@ -273,8 +282,8 @@ def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, m
 
     Returns
     -------
-    surface_funciton : str
-        A string corresponding to the surface function that is fit
+    surface_coefs : numpy array
+        An array with the corresponding coefficiencts for the surface function
     '''
 
     # checking for the different possibilities for method
@@ -324,14 +333,10 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
     **kwargs : additional arguments
         Additional arguments to pass to the linear regression model, if desired
 
-    Notes
-    -----
-    - Returns np.nan if no best split can be found
-
     Returns
     -------
-    split_info : tuple
-        A tuple of the form (column_coefs, split_value)
+    split_info : dict
+        A dictionary with the keys `indices`, `coefs`, `split_value`, and `split_gini`
     '''
 
     # convert to numpy array as needed
@@ -357,7 +362,6 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
             target_col_index = ind[-1],
             bins_per_var = n_bins
         )
-        print(surface_coords)
         try:
             surface_coefs = get_surface_coef(
                 surface_coords = surface_coords,
@@ -381,7 +385,6 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
                 split_values['split_value'] = best_split[0]
                 split_values['split_gini'] = best_split[1]
         except ValueError as e:
-            print(e)
             pass
 
     return split_values
