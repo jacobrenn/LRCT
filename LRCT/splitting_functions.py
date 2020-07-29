@@ -56,14 +56,12 @@ def _get_split_candidates(col):
     candidates : numpy array
         The splitting candidates
     '''
-    if col.shape[0] == 1:
-        return np.nan
     unique_sorted = np.sort(np.unique(col))
     if unique_sorted.shape[0] == 1:
         return np.nan
     return np.array(list(zip(unique_sorted, unique_sorted[1:]))).mean(axis = 1)
 
-def _split_candidate_results(x_col, y_values, candidate):
+def _evaluate_split_candidate(x_col, y_values, candidate):
     '''Calculate the results of splitting a column on a single value
 
     Parameters
@@ -112,7 +110,7 @@ def _column_best_split(x_col, y_values):
     if candidates is np.nan:
         return np.array([np.inf, np.inf])
     
-    candidate_ginis = (_split_candidate_results(x_col, y_values, cand) for cand in candidates)
+    candidate_ginis = (_evaluate_split_candidate(x_col, y_values, cand) for cand in candidates)
     split_results = np.array(list(zip(candidates, candidate_ginis)))
     return split_results[split_results[:, 1] == split_results[:, 1].min()][0, :]
 
@@ -257,7 +255,7 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
     coord_array = np.array(coord_array)
     return coord_array[coord_array[:, -1] != np.inf]
 
-def create_surface_function(surface_coords, column_names, highest_degree = 1, fit_intercept = True, method = 'ols', **kwargs):
+def create_surface_function(surface_coords, highest_degree = 1, fit_intercept = True, method = 'ols', **kwargs):
     '''Creates the estimate to the surface function
 
     Parameters
@@ -287,33 +285,51 @@ def create_surface_function(surface_coords, column_names, highest_degree = 1, fi
     elif method == 'ridge':
         model = Ridge(fit_intercept = fit_intercept, **kwargs)
     elif method == 'lasso':
-        model = LinearRegression(fit_intercept = fit_intercept, **kwargs)
+        model = Lasso(fit_intercept = fit_intercept, **kwargs)
     else:
-        raise ValueError(f'Accepted values for `mathod` are `ols`, `ridge`, and `lasso`, got {method}')
+        raise ValueError(f'Accepted values for `method` are `ols`, `ridge`, and `lasso`, got {method}')
 
     ### THIS PART CAN BE IMPROVED SIGNIFICANTLY -- I SUSPECT THIS IS WHERE WE GET OUR SLOW PERFORMANCE PROBLEMS
 
+    # separate the prediction and the predictor columns
+    predictor_columns = surface_coords[:, :-1]
+    prediction_column = surface_coords[:, -1]
+
+    print(predictor_columns.shape)
+    # create the additional columns 
+    if highest_degree > 1:
+        for col_idx in range(predictor_columns.shape[1]):
+            for degree in range(2, highest_degree + 1):
+                predictor_columns = np.concatenate([predictor_columns, (predictor_columns[:, col_idx]**degree).reshape(-1, 1)], axis = 1)
+
+    # fit the regression model
+    model.fit(predictor_columns, prediction_column.reshape(-1, 1))
+    return model.coef_
+
+
+    # OLD STUFF BELOW THIS LINE
+
     # get the DataFrame for the surface coordinates
-    surface_coords = pd.DataFrame(surface_coords, columns = column_names)
+    #surface_coords = pd.DataFrame(surface_coords, columns = column_names)
 
     # if highest_degree is greater than 1, make the new columns corresponding to that
-    if highest_degree > 1:
-        for col in surface_coords.columns[:-1]:
-            for degree in range(2, highest_degree + 1):
-                surface_coords[f'{col}**{degree}'] = surface_coords[col]**degree
+    #if highest_degree > 1:
+        #for col in surface_coords.columns[:-1]:
+            #for degree in range(2, highest_degree + 1):
+                #surface_coords[f'{col}**{degree}'] = surface_coords[col]**degree
 
     # separate the column to predict from the columns to predict from
-    to_predict = surface_coords[column_names[-1]]
-    predict_from = surface_coords[[col for col in surface_coords.columns.tolist() if col != column_names[-1]]]
+    #to_predict = surface_coords[column_names[-1]]
+    #predict_from = surface_coords[[col for col in surface_coords.columns.tolist() if col != column_names[-1]]]
 
     # fit the model and get the coefficients
-    model.fit(predict_from.values, to_predict.values)
-    coefs = model.coef_
+    #model.fit(predict_from.values, to_predict.values)
+    #coefs = model.coef_
 
     # configure the return function and return it
-    ret_function = ' + '.join([f'{coefs[i]}*{predict_from.columns[i]}' for i in range(coefs.shape[0])]) 
-    ret_function += f' - {column_names[-1]}'
-    return ret_function.replace('**','^')
+    #ret_function = ' + '.join([f'{coefs[i]}*{predict_from.columns[i]}' for i in range(coefs.shape[0])]) 
+    #ret_function += f' - {column_names[-1]}'
+    #return ret_function.replace('**','^')
 
     ### END PROBLEMATIC PART
 
