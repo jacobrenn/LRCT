@@ -255,7 +255,7 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
     coord_array = np.array(coord_array)
     return coord_array[coord_array[:, -1] != np.inf]
 
-def create_surface_function(surface_coords, highest_degree = 1, fit_intercept = True, method = 'ols', **kwargs):
+def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, method = 'ols', **kwargs):
     '''Creates the estimate to the surface function
 
     Parameters
@@ -295,43 +295,16 @@ def create_surface_function(surface_coords, highest_degree = 1, fit_intercept = 
     predictor_columns = surface_coords[:, :-1]
     prediction_column = surface_coords[:, -1]
 
-    print(predictor_columns.shape)
-    # create the additional columns 
+    # create the additional columns (for higher degrees)
+    # order will be matrices of increasing degree appended together
     if highest_degree > 1:
-        for col_idx in range(predictor_columns.shape[1]):
-            for degree in range(2, highest_degree + 1):
+        for degree in range(2, highest_degree + 1):
+            for col_idx in range(predictor_columns.shape[1]):
                 predictor_columns = np.concatenate([predictor_columns, (predictor_columns[:, col_idx]**degree).reshape(-1, 1)], axis = 1)
 
     # fit the regression model
     model.fit(predictor_columns, prediction_column.reshape(-1, 1))
     return model.coef_
-
-
-    # OLD STUFF BELOW THIS LINE
-
-    # get the DataFrame for the surface coordinates
-    #surface_coords = pd.DataFrame(surface_coords, columns = column_names)
-
-    # if highest_degree is greater than 1, make the new columns corresponding to that
-    #if highest_degree > 1:
-        #for col in surface_coords.columns[:-1]:
-            #for degree in range(2, highest_degree + 1):
-                #surface_coords[f'{col}**{degree}'] = surface_coords[col]**degree
-
-    # separate the column to predict from the columns to predict from
-    #to_predict = surface_coords[column_names[-1]]
-    #predict_from = surface_coords[[col for col in surface_coords.columns.tolist() if col != column_names[-1]]]
-
-    # fit the model and get the coefficients
-    #model.fit(predict_from.values, to_predict.values)
-    #coefs = model.coef_
-
-    # configure the return function and return it
-    #ret_function = ' + '.join([f'{coefs[i]}*{predict_from.columns[i]}' for i in range(coefs.shape[0])]) 
-    #ret_function += f' - {column_names[-1]}'
-    #return ret_function.replace('**','^')
-
-    ### END PROBLEMATIC PART
 
 def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree = 1, fit_intercept = True, method = 'ols', n_bins = 10, **kwargs):
     '''Find the best split on data using LRCT methods
