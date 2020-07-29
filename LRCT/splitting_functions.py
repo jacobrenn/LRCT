@@ -384,7 +384,7 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
                 split_values['coefs'] = surface_coefs
                 split_values['split_value'] = best_split[0]
                 split_values['split_gini'] = best_split[1]
-        except ValueError as e:
+        except ValueError:
             pass
 
     return split_values
