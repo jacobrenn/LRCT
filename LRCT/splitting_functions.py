@@ -262,8 +262,6 @@ def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, m
     ----------
     surface_coords : numpy array
         Coordinates from the surface, format expected from the get_surface_coords function
-    column_names : iterable
-        Names of the columns for the variables
     highest_degree : int (default 1)
         Highest degree to use for any single one of the variables
     fit_intercept : bool (default True)
@@ -289,8 +287,6 @@ def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, m
     else:
         raise ValueError(f'Accepted values for `method` are `ols`, `ridge`, and `lasso`, got {method}')
 
-    ### THIS PART CAN BE IMPROVED SIGNIFICANTLY -- I SUSPECT THIS IS WHERE WE GET OUR SLOW PERFORMANCE PROBLEMS
-
     # separate the prediction and the predictor columns
     predictor_columns = surface_coords[:, :-1]
     prediction_column = surface_coords[:, -1]
@@ -304,14 +300,14 @@ def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, m
 
     # fit the regression model
     model.fit(predictor_columns, prediction_column.reshape(-1, 1))
-    return model.coef_
+    return model.coef_[0].flatten()
 
 def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree = 1, fit_intercept = True, method = 'ols', n_bins = 10, **kwargs):
     '''Find the best split on data using LRCT methods
 
     Parameters
     ----------
-    x_values : pandas DataFrame
+    x_values : 2d array-like
         A DataFrame of values to use to predict from
     y_values : 1d numpy array
         The target values to predict
@@ -335,61 +331,57 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
     Returns
     -------
     split_info : tuple
-        A tuple of the form (column name, split_value)
+        A tuple of the form (column_coefs, split_value)
     '''
 
-    # separate columns from the values
-    cols = x_values.columns.tolist()
-    x_numpy = x_values.values
-    x_copy = x_values.copy()
+    # convert to numpy array as needed
+    x_copy = np.asarray(x_values).copy()
 
     # get the combinations of columns that we will use
-    all_indices = combinations(range(len(cols)), num_independent + 1)
+    all_indices = combinations(range(x_copy.shape[1]), num_independent + 1)
+
+    # instantiate a dictionary to return
+    split_values = {
+        'indices' : None,
+        'coefs' : None,
+        'split_value' : None,
+        'split_gini' : 1
+    }
 
     # get all of the surface coordinates fo each of the combinations of columns to determine the coordinates from
     for ind in all_indices:
         surface_coords = get_surface_coords(
-            x_numpy,
+            x_copy,
             y_values,
             bin_col_indices = ind[:-1],
             target_col_index = ind[-1],
             bins_per_var = n_bins
         )
+        print(surface_coords)
         try:
-            surface_function = create_surface_function(
+            surface_coefs = get_surface_coef(
                 surface_coords = surface_coords,
-                column_names = [cols[i] for i in ind],
                 highest_degree = highest_degree,
                 fit_intercept = fit_intercept,
                 method = method,
                 **kwargs
             )
-            # parse the surface function
-            rest, last_col = surface_function.split(' - ')[0], surface_function.split(' - ')[1]
-            new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
-            new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
-            new_col_components = []
-            for i in range(len(new_coefs)):
-                if '^' in new_cols[i]:
-                    col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
-                    new_col_components.append(f'{new_coefs[i]}*x_values["{col}"]**{exp}')
-                else:
-                    new_col_components.append(f'{new_coefs[i]}*x_values["{new_cols[i]}"]')
 
-            # rewrite the surface function so that it works as `eval`
-            new_col_str = ' + '.join(new_col_components)
-            new_col_str += f' - x_values["{last_col}"]'
-
-            # create a new function using the surface function
-            x_copy[surface_function] = eval(new_col_str)
-        except ValueError:
+            # get the new column and determine the split
+            new_col = np.zeros(x_copy.shape[0])
+            for i in range(surface_coefs.shape[0]):
+                column_idx = ind[i % len(ind) - 1]
+                power = (i // (len(ind) - 1)) + 1
+                new_col += surface_coefs[i]*x_copy[:,column_idx]**power
+            new_col -= x_copy[:, ind[-1]]
+            best_split = _column_best_split(new_col, y_values)
+            if best_split[1] < split_values['split_gini']:
+                split_values['indices'] = ind
+                split_values['coefs'] = surface_coefs
+                split_values['split_value'] = best_split[0]
+                split_values['split_gini'] = best_split[1]
+        except ValueError as e:
+            print(e)
             pass
 
-    # now just find the best split using traditional methods
-    split_info = find_best_split(x_copy, y_values)
-
-    # returns split info or nan if the split info gives nothing
-    if split_info is np.nan:
-        return split_info
-    else:
-        return x_copy.columns[split_info[0]], split_info[1]
+    return split_values
