@@ -443,58 +443,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             # if there's no clear winner, return a random guess from the most common ones
             highest_indices = [i for i in range(probabilities.shape[0]) if probabilities[i] == probabilities.max()]
             return np.random.choice(highest_indices)
-
-        # OLD STUFF BELOW HERE
-
-        # continue until at a leaf Node (split is np.nan == float, not tuple)
-        while isinstance(current_node.split, tuple):
-
-            # figure out the child IDs
-            child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
-            # get the split column and the split value
-            split_col, split_value = current_node.split
-
-            # if the column is not in the default keys, it must be a multivariate split
-            # if so, construct the column that you want
-            if split_col not in instance.keys():
-                rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
-                new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
-                new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
-                new_col_components = []
-                for i in range(len(new_coefs)):
-                    if '^' in new_cols[i]:
-                        col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
-                        new_col_components.append(f'{new_coefs[i]}*instance["{col}"]**{exp}')
-                    else:
-                        new_col_components.append(f'{new_coefs[i]}*instance["{new_cols[i]}"]')
-                new_col_str = ' + '.join(new_col_components)
-                new_col_str += f' - instance["{last_col}"]'
-                val_to_check = eval(new_col_str)
-
-            # the else case is easy
-            else:
-                val_to_check = instance[split_col]
-
-            # we always know that the Node corresponding to split_col < split_val is made first
-            # hence, it has the lower ID and the Node corresponding to split_col > split_val has the
-            # higher ID
-            if val_to_check <= split_value:
-                new_node_id = min(child_node_ids)
-            else:
-                new_node_id = max(child_node_ids)
-            current_node = self._nodes[new_node_id]
-
-        # after we're out of the while loop, get the current distribution to see what we need to predict
-        current_distribution = self.node_distributions_[current_node.identifier]
-
-        # if we have a clear winner (highest vote), predict that
-        if current_distribution.min() != current_distribution.max():
-            return current_distribution.argmax()
-
-        # else, predict a random value
-        else:
-            return np.random.choice(self.values_to_predict_.shape[0])
-
+            
     def _predict_single_proba(self, instance):
         """Predict class probabilities for a single instance
 
