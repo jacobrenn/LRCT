@@ -224,7 +224,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             return None
 
         # make a copy of X and work with that
-        x_copy = x_data.copy()
+        x_copy = np.array(x_data).copy()
 
         # get the node, the prospective parent id, and the prospective parent depth
         node = self._nodes[node_id]
