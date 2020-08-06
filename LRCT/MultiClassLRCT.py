@@ -72,10 +72,10 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
         if proba:
             return probs
         else:
-            if (probabilities == probabilities.max()).sum() == 1:
-                return probabilities.argmax()
+            if (probs == probs.max()).sum() == 1:
+                return probs.argmax()
             else:
-                return np.random.choice([i for i in range(probabilities.shape[0]) if probabilities[i] == probabilities.max()])
+                return np.random.choice([i for i in range(probs.shape[0]) if probs[i] == probs.max()])
 
     def predict(self, x):
         if not self._is_fit:
