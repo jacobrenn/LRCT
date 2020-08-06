@@ -408,7 +408,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         while isinstance(current_node.split, dict):
             child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
-            if current_node.split.get('col_idx'):
+            if current_node.split.get('col_idx') is not None:
                 if instance[current_node.split['col_idx']] <= current_node.split['split_value']:
                     new_node_id = min(child_node_ids)
                 else:
