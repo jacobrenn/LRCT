@@ -305,7 +305,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         # typechecking
         if not isinstance(x, (np.ndarray, pd.DataFrame)):
-            raise TypeError('x must be pandas DataFrame')
+            raise TypeError('x must be ndarray or pandas DataFrame')
         if not isinstance(y, (np.ndarray, pd.Series)):
             raise TypeError('y must be ndarray or Series')
         if len(y.shape) != 1:
@@ -394,11 +394,13 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         ----------
         instance : 1d numpy array
             Object which has the desired implementation of the .keys() method
+        proba : bool (default False)
+            Whether to return probabilities
 
         Returns
         -------
-        prediction : int
-            The class predicted
+        prediction : int or float
+            The class predicted or probabilities predicted
         """
 
         # start at the root Node
