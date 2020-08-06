@@ -255,7 +255,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         else:
             split = best_lrct_split
 
-        if split.get('col_idx'):
+        if split.get('col_idx') is not None:
             less_idx = x_copy[:, split.get('col_idx')] <= split.get('split_value')
             greater_idx = x_copy[:, split.get('col_idx')] > split.get('split_value')
         else:
