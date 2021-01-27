@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import accuracy_score
 from LRCT.LRCT import LRCTree
+from LRCT.Exceptions import NotFitError
 
 class MultiClassLRCT(BaseEstimator, ClassifierMixin):
     """Multi-Class Linear Regression Classification Tree
