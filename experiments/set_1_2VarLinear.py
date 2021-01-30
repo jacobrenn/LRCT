@@ -15,3 +15,5 @@ if __name__ == '__main__':
     # Generate the data, domain for x0 is [0, 14], domain for x1 is [0, 8]
     two_var_x = np.random.random((1000, 2))
     two_var_x[:, 0] = two_var_x[:, 0] * 14
+    two_var_x[:, 1] = two_var_x[:, 1] * 8
+    
