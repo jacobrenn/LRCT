@@ -15,9 +15,12 @@ def model_report(
     print(f'Accuracy Score: {acc}')
 
     if binary:
-        probs = model.predict_proba(x_test)[:, 1]
-        auc = roc_auc_score(y_test, probs)
-        print(f'AUC: {auc}')
+        try:
+            probs = model.predict_proba(x_test)[:, 1]
+            auc = roc_auc_score(y_test, probs)
+            print(f'AUC: {auc}')
+        except:
+            pass
 
     print('Confusion Matrix:')
     print(conf_mat)
