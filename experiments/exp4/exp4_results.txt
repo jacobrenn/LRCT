@@ -1,0 +1,59 @@
+LRCT Results
+
+
+Accuracy Score: 0.998
+AUC: 0.9980407944176062
+Confusion Matrix:
+[[808   2]
+ [  1 689]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00       810
+           1       1.00      1.00      1.00       690
+
+    accuracy                           1.00      1500
+   macro avg       1.00      1.00      1.00      1500
+weighted avg       1.00      1.00      1.00      1500
+
+
+
+
+CART Results
+
+
+Accuracy Score: 0.8153333333333334
+AUC: 0.8236446591519055
+Confusion Matrix:
+[[583 227]
+ [ 50 640]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.92      0.72      0.81       810
+           1       0.74      0.93      0.82       690
+
+    accuracy                           0.82      1500
+   macro avg       0.83      0.82      0.82      1500
+weighted avg       0.84      0.82      0.81      1500
+
+
+
+
+OC1 Results
+
+
+Accuracy Score: 0.9413333333333334
+Confusion Matrix:
+[[759  51]
+ [ 37 653]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.95      0.94      0.95       810
+           1       0.93      0.95      0.94       690
+
+    accuracy                           0.94      1500
+   macro avg       0.94      0.94      0.94      1500
+weighted avg       0.94      0.94      0.94      1500
+
