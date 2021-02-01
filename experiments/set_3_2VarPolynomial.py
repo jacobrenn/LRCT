@@ -33,7 +33,7 @@ if __name__ == '__main__':
         c = y_train,
         cmap = 'Set1'
     )
-    plt.title('Training Data, Experiment 1', fontsize = 'xx-large')
+    plt.title('Training Data, Experiment 3', fontsize = 'xx-large')
     plt.xlabel('Feature 1', fontsize = 'x-large')
     plt.ylabel('Feature 2', fontsize = 'x-large')
     plt.xticks(fontsize = 'large')
@@ -65,10 +65,12 @@ if __name__ == '__main__':
 
     # Plot LRCT learned decision boundary
     intercept = lrct.nodes[0].split['split_value']
-    coef = float(lrct.nodes[0].split['coefs'][0])
+    linear_coef = float(lrct.nodes[0].split['coefs'][0])
+    squared_coef = float(lrct.nodes[0].split['coefs'][1])
+    cubed_coef = float(lrct.nodes[0].split['coefs'][2])
     col1 = lrct.nodes[0].split['indices'][0]
     col2 = lrct.nodes[0].split['indices'][1]
-    split_line = coef * x_test[:, col1] - intercept
+    split_line = linear_coef * x_test[:, col1] + squared_coef * x_test[:, col1]**2 + cubed_coef * x_test[:, col1]**3 - intercept
 
     plt.figure(figsize = (10, 4))
     plt.scatter(
@@ -82,7 +84,7 @@ if __name__ == '__main__':
         split_line,
         c = 'black'
     )
-    plt.title('LRCT Learned Decision Boundary, Experiment 2', fontsize = 'xx-large')
+    plt.title('LRCT Learned Decision Boundary, Experiment 3', fontsize = 'xx-large')
     plt.xlabel('Feature 1', fontsize = 'x-large')
     plt.ylabel('Feature 2', fontsize = 'x-large')
     plt.xticks(fontsize = 'large')

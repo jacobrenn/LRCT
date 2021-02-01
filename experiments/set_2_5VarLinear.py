@@ -36,7 +36,7 @@ if __name__ == '__main__':
         c = y_train,
         cmap = 'Set1'
     )
-    plt.title('Training Data, Experiment 1', fontsize = 'xx-large')
+    plt.title('Training Data, Experiment 2', fontsize = 'xx-large')
     plt.xlabel('Feature 1', fontsize = 'x-large')
     plt.ylabel('Feature 2', fontsize = 'x-large')
     plt.xticks(fontsize = 'large')
