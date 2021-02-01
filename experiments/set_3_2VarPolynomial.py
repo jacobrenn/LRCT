@@ -16,10 +16,10 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     # Generate the data, domain for x0 is [0, 5], domain for x1 is [0, 20]
     np.random.seed(4736)
-    two_var_x = np.random.random((1000, 2))
+    two_var_x = np.random.random((5000, 2))
     two_var_x[:, 0] = two_var_x[:, 0] * 5
     two_var_x[:, 1] = two_var_x[:, 1] * 20
-    target = (two_var_x[:, 1] > 2 + 2*two_var_x[:, 0] - two_var_x[:, 0]**2 + (two_var_x[:, 0]**3)/5).astype(int)
+    target = (two_var_x[:, 1] > 2 + 2*two_var_x[:, 0] - two_var_x[:, 0]**2 + (two_var_x[:, 0]**3)/2).astype(int)
 
     # Create train, val, test sets
     x_train_val, x_test, y_train_val, y_test = train_test_split(two_var_x, target, test_size = 0.3, random_state = 134456)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     plt.savefig('exp3/exp_3_training.png')
 
     # Train the models
-    lrct = LRCTree(max_depth = 1).fit(x_train, y_train)
+    lrct = LRCTree(max_depth = 1, highest_degree = 3).fit(x_train, y_train)
     cart = DecisionTreeClassifier(max_depth = 1).fit(x_train, y_train)
     oc1 = ObliqueTree(splitter = 'oc1')
     oc1.fit(x_train, y_train)
