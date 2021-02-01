@@ -43,7 +43,7 @@ if __name__ == '__main__':
     plt.savefig('exp3/exp_3_training.png')
 
     # Train the models
-    lrct = LRCTree(max_depth = 1, highest_degree = 3).fit(x_train, y_train)
+    lrct = LRCTree(max_depth = 1, highest_degree = 3, n_bins = 20).fit(x_train, y_train)
     cart = DecisionTreeClassifier(max_depth = 1).fit(x_train, y_train)
     oc1 = ObliqueTree(splitter = 'oc1')
     oc1.fit(x_train, y_train)
