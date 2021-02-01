@@ -79,7 +79,7 @@ if __name__ == '__main__':
         c = y_test,
         cmap = 'Set1'
     )
-    plt.plot(
+    plt.scatter(
         x_test[:, 0],
         split_line,
         c = 'black'
