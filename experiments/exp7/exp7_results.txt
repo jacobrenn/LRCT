@@ -1,0 +1,180 @@
+Results for Noise Level 0.1
+LRCT Results
+
+
+Accuracy Score: 0.8053333333333333
+AUC: 0.8183454110405405
+Confusion Matrix:
+[[576 253]
+ [ 39 632]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.94      0.69      0.80       829
+           1       0.71      0.94      0.81       671
+
+    accuracy                           0.81      1500
+   macro avg       0.83      0.82      0.81      1500
+weighted avg       0.84      0.81      0.80      1500
+
+
+
+
+CART Results
+
+
+Accuracy Score: 0.8053333333333333
+AUC: 0.8183454110405405
+Confusion Matrix:
+[[576 253]
+ [ 39 632]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.94      0.69      0.80       829
+           1       0.71      0.94      0.81       671
+
+    accuracy                           0.81      1500
+   macro avg       0.83      0.82      0.81      1500
+weighted avg       0.84      0.81      0.80      1500
+
+
+
+
+OC1 Results
+
+
+Accuracy Score: 0.89
+Confusion Matrix:
+[[756  73]
+ [ 92 579]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.89      0.91      0.90       829
+           1       0.89      0.86      0.88       671
+
+    accuracy                           0.89      1500
+   macro avg       0.89      0.89      0.89      1500
+weighted avg       0.89      0.89      0.89      1500
+
+Results for Noise Level 0.2
+LRCT Results
+
+
+Accuracy Score: 0.8233333333333334
+AUC: 0.8280971633717387
+Confusion Matrix:
+[[649 180]
+ [ 85 586]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.88      0.78      0.83       829
+           1       0.77      0.87      0.82       671
+
+    accuracy                           0.82      1500
+   macro avg       0.82      0.83      0.82      1500
+weighted avg       0.83      0.82      0.82      1500
+
+
+
+
+CART Results
+
+
+Accuracy Score: 0.8233333333333334
+AUC: 0.8280971633717387
+Confusion Matrix:
+[[649 180]
+ [ 85 586]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.88      0.78      0.83       829
+           1       0.77      0.87      0.82       671
+
+    accuracy                           0.82      1500
+   macro avg       0.82      0.83      0.82      1500
+weighted avg       0.83      0.82      0.82      1500
+
+
+
+
+OC1 Results
+
+
+Accuracy Score: 0.81
+Confusion Matrix:
+[[679 150]
+ [135 536]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.83      0.82      0.83       829
+           1       0.78      0.80      0.79       671
+
+    accuracy                           0.81      1500
+   macro avg       0.81      0.81      0.81      1500
+weighted avg       0.81      0.81      0.81      1500
+
+Results for Noise Level 0.3
+LRCT Results
+
+
+Accuracy Score: 0.806
+AUC: 0.8189485473493463
+Confusion Matrix:
+[[577 252]
+ [ 39 632]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.94      0.70      0.80       829
+           1       0.71      0.94      0.81       671
+
+    accuracy                           0.81      1500
+   macro avg       0.83      0.82      0.81      1500
+weighted avg       0.84      0.81      0.80      1500
+
+
+
+
+CART Results
+
+
+Accuracy Score: 0.806
+AUC: 0.8189485473493463
+Confusion Matrix:
+[[577 252]
+ [ 39 632]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.94      0.70      0.80       829
+           1       0.71      0.94      0.81       671
+
+    accuracy                           0.81      1500
+   macro avg       0.83      0.82      0.81      1500
+weighted avg       0.84      0.81      0.80      1500
+
+
+
+
+OC1 Results
+
+
+Accuracy Score: 0.664
+Confusion Matrix:
+[[564 265]
+ [239 432]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.70      0.68      0.69       829
+           1       0.62      0.64      0.63       671
+
+    accuracy                           0.66      1500
+   macro avg       0.66      0.66      0.66      1500
+weighted avg       0.67      0.66      0.66      1500
+
