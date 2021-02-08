@@ -92,7 +92,7 @@ if __name__ == '__main__':
                 split_line,
                 c = 'black'
             )
-            plt.title('LRCT Learned Decision Boundary, Experiment 7', fontsize = 'xx-large')
+            plt.title(f'LRCT Learned Decision Boundary, Experiment 7, Noise Level {prop}', fontsize = 'xx-large')
             plt.xlabel('Feature 1', fontsize = 'x-large')
             plt.ylabel('Feature 2', fontsize = 'x-large')
             plt.xticks(fontsize = 'large')
