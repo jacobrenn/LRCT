@@ -22,7 +22,7 @@ if __name__ == '__main__':
     np.random.seed(4736)
     two_var_x = np.random.random((10000, 2))
     two_var_x = two_var_x * 10
-    target = (np.floor(two_var_x[:, 0]) + np.floor(two_var_x[:, 1])) % 2
+    target = ((np.floor(two_var_x[:, 0]) + np.floor(two_var_x[:, 1])) % 2).astype(int)
 
     # Create train, val, test sets
     x_train_val, x_test, y_train_val, y_test = train_test_split(two_var_x, target, test_size = 0.3, random_state = 133523)
@@ -57,7 +57,12 @@ if __name__ == '__main__':
     }
 
     x_train = x_train_val[np.array(train_val_fold) == -1, :]
-    y_train = y_train_val[np.array(train_val_fold) == -1]
+    y_train = y_train_val[np.array(train_val_fold) == -1].astype(int)
+
+    print(x_train.shape)
+    print(x_train[:5, :])
+    print(y_train.shape)
+    print(y_train[:5])
     
     oc1_model = ObliqueTree(splitter = 'oc1')
     oc1_model.fit(x_train, y_train)
