@@ -16,10 +16,10 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    # Generate the ata, domain for x0 and x1 is [0, 100]
+    # Generate the ata, domain for x0 and x1 is [0, 10]
     np.random.seed(4736)
     two_var_x = np.random.random((100000, 2))
-    two_var_x = two_var_x * 100
+    two_var_x = two_var_x * 10
     target = (np.floor(two_var_x[:, 0]) % 2) * (np.floor(two_var_x[:, 1]) % 2)
 
     # Create train, val, test sets
