@@ -18,9 +18,9 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     # Generate the ata, domain for x0 and x1 is [0, 10]
     np.random.seed(4736)
-    two_var_x = np.random.random((100000, 2))
+    two_var_x = np.random.random((10000, 2))
     two_var_x = two_var_x * 10
-    target = (np.floor(two_var_x[:, 0]) % 2) * (np.floor(two_var_x[:, 1]) % 2)
+    target = (np.floor(two_var_x[:, 0]) % 2) * (np.ceil(two_var_x[:, 1]) % 2)
 
     # Create train, val, test sets
     x_train_val, x_test, y_train_val, y_test = train_test_split(two_var_x, target, test_size = 0.3, random_state = 133523)
