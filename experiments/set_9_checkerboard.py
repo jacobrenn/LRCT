@@ -29,13 +29,16 @@ if __name__ == '__main__':
     val_indices = np.random.choice(x_train_val.shape[0], int(x_train_val.shape[0] * 0.4), replace = False)
     train_val_fold = [0 if i in val_indices else -1 for i in range(x_train_val.shape[0])]
     ps = PredefinedSplit(test_fold = train_val_fold)
+
+    x_train = x_train_val[np.array(train_val_fold) == -1, :]
+    y_train = y_train_val[np.array(train_val_fold) == -1].astype(int)
     
     # Plot the data
     plt.figure(figsize = (10, 4))
     plt.scatter(
-        x_train_val[np.array(train_val_fold) == -1, :][:, 0],
-        x_train_val[np.array(train_val_fold) == -1, :][:, 1],
-        c = y_train_val[train_val_fold == -1],
+        x_train[:, 0],
+        x_train[:, 1],
+        c = y_train,
         cmap = 'Set1'
     )
     plt.title('Training Data, Experiment 9', fontsize = 'xx-large')
@@ -55,9 +58,6 @@ if __name__ == '__main__':
         'highest_degree': range(1, 3),
         'n_bins': [10, 20]
     }
-
-    x_train = x_train_val[np.array(train_val_fold) == -1, :]
-    y_train = y_train_val[np.array(train_val_fold) == -1].astype(int)
 
     print(x_train.shape)
     print(x_train[:5, :])
