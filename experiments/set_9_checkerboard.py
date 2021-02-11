@@ -15,6 +15,7 @@ from sklearn.linear_model import LogisticRegression
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
+from exp_utils import model_report
 
 if __name__ == '__main__':
     # Generate the ata, domain for x0 and x1 is [0, 10]
@@ -32,8 +33,8 @@ if __name__ == '__main__':
     # Plot the data
     plt.figure(figsize = (10, 4))
     plt.scatter(
-        x_train_val[train_val_fold == -1][:, 0],
-        x_train_val[train_val_fold == -1][:, 1],
+        x_train_val[np.array(train_val_fold) == -1][:, 0],
+        x_train_val[np.array(train_val_fold) == -1][:, 1],
         c = y_train_val[train_val_fold == -1],
         cmap = 'Set1'
     )
@@ -55,6 +56,10 @@ if __name__ == '__main__':
         'n_bins': [10, 20]
     }
 
+    oc1_model = ObliqueTree(splitter = 'oc1')
+    oc1_model.fit(x_train_val[np.array(train_val_fold) == -1], y_train_val[np.array(train_val_fold) == -1])
+    model_report(oc1_model, x_test, y_test)
+    
     lrct_searcher = GridSearchCV(
         LRCTree(),
         lrct_params,
