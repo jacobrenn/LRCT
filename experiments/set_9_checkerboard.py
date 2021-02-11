@@ -59,13 +59,10 @@ if __name__ == '__main__':
         'n_bins': [10, 20]
     }
 
-    print(x_train.shape)
-    print(x_train[:5, :])
-    print(y_train.shape)
-    print(y_train[:5])
-    
     oc1_model = ObliqueTree(splitter = 'oc1')
     oc1_model.fit(x_train, y_train)
+
+    print('OC1 Model Performance:')
     
     model_report(oc1_model, x_test, y_test)
     
@@ -77,4 +74,7 @@ if __name__ == '__main__':
         cv = ps
     ).fit(x_train_val, y_train_val)
 
+    print('LRCT Model Performance:')
+    print('LRCT parameters:')
+    print(lrct_searcher.best_params_)
     model_report(lrct_searcher, x_test, y_test)
