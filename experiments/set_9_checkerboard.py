@@ -33,8 +33,8 @@ if __name__ == '__main__':
     # Plot the data
     plt.figure(figsize = (10, 4))
     plt.scatter(
-        x_train_val[np.array(train_val_fold) == -1][:, 0],
-        x_train_val[np.array(train_val_fold) == -1][:, 1],
+        x_train_val[np.array(train_val_fold) == -1, :][:, 0],
+        x_train_val[np.array(train_val_fold) == -1, :][:, 1],
         c = y_train_val[train_val_fold == -1],
         cmap = 'Set1'
     )
@@ -56,8 +56,12 @@ if __name__ == '__main__':
         'n_bins': [10, 20]
     }
 
+    x_train = x_train_val[np.array(train_val_fold) == -1, :]
+    y_train = y_train_val[np.array(train_val_fold) == -1]
+    
     oc1_model = ObliqueTree(splitter = 'oc1')
-    oc1_model.fit(x_train_val[np.array(train_val_fold) == -1], y_train_val[np.array(train_val_fold) == -1])
+    oc1_model.fit(x_train, y_train)
+    
     model_report(oc1_model, x_test, y_test)
     
     lrct_searcher = GridSearchCV(
