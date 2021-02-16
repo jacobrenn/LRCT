@@ -152,7 +152,7 @@ if __name__ == '__main__':
     neural_net.fit(
         x_train,
         y_train,
-        epochs = 100,
+        epochs = 1000,
         callbacks = [cb],
         validation_data = (x_val, y_val)
     )
