@@ -34,7 +34,7 @@ if __name__ == '__main__':
     y_train = y_train_val[np.array(train_val_fold) == -1].astype(int)
 
     x_val = x_train_val[np.array(train_val_fold) != -1, :]
-    y_val = y_trani_val[np.array(train_val_fold) != -1].astype(int)
+    y_val = y_tran_val[np.array(train_val_fold) != -1].astype(int)
     
     # Plot the data
     plt.figure(figsize = (10, 4))
