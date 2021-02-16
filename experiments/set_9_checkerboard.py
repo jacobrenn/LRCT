@@ -56,8 +56,10 @@ if __name__ == '__main__':
     oc1_model.fit(x_train, y_train)
 
     print('OC1 Model Performance:')
+    print('\n')
     
     model_report(oc1_model, x_test, y_test)
+    print('\n\n')
 
     # CART
     cart_model = DecisionTreeClassifier()
@@ -71,14 +73,16 @@ if __name__ == '__main__':
         cart_model,
         cart_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
     print('CART Performance:')
     print('CART Parameters:')
     print(cart_searcher.best_params_)
+    print('\n')
     model_report(cart_searcher, x_test, y_test)
+    print('\n\n')
 
     # KNN
     knn = KNeighborsClassifier()
@@ -91,14 +95,16 @@ if __name__ == '__main__':
         knn,
         knn_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
     print('KNN Model Performance:')
     print('KNN Parameters:')
     print(knn_searcher.best_params_)
+    print('\n')
     model_report(knn_searcher, x_test, y_test)
+    print('\n\n')
 
     # Logistic Regression
     log_reg = LogisticRegression()
@@ -109,15 +115,19 @@ if __name__ == '__main__':
         log_reg,
         log_reg_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
     print('Logistic Regression Model Performance:')
     print('Logistic Regression Parameters:')
     print(log_reg_searcher.best_params_)
+    print('\n')
     model_report(log_reg_searcher, x_test, y_test)
+    print('\n\n')
 
+    #TODO, add neural net here
+    
     
     # Lastly, the LRCT
     lrct = LRCTree()
@@ -134,11 +144,12 @@ if __name__ == '__main__':
         lrct,
         lrct_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
     print('LRCT Model Performance:')
     print('LRCT Parameters:')
     print(lrct_searcher.best_params_)
+    print('\n')
     model_report(lrct_searcher, x_test, y_test)
