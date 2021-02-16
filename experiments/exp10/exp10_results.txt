@@ -1,0 +1,127 @@
+OC1 Model Performance:
+
+
+Accuracy Score: 0.9703333333333334
+Confusion Matrix:
+[[1445   45]
+ [  44 1466]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.97      0.97      0.97      1490
+           1       0.97      0.97      0.97      1510
+
+    accuracy                           0.97      3000
+   macro avg       0.97      0.97      0.97      3000
+weighted avg       0.97      0.97      0.97      3000
+
+
+
+
+CART Performance:
+CART Parameters:
+{'max_depth': 8, 'min_samples_leaf': 3, 'min_samples_split': 5}
+
+
+Accuracy Score: 0.9826666666666667
+AUC: 0.9883503711276057
+Confusion Matrix:
+[[1469   21]
+ [  31 1479]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.98      0.99      0.98      1490
+           1       0.99      0.98      0.98      1510
+
+    accuracy                           0.98      3000
+   macro avg       0.98      0.98      0.98      3000
+weighted avg       0.98      0.98      0.98      3000
+
+
+
+
+KNN Model Performance:
+KNN Parameters:
+{'n_neighbors': 6, 'weights': 'uniform'}
+
+
+Accuracy Score: 0.9806666666666667
+AUC: 0.9894755322458777
+Confusion Matrix:
+[[1470   20]
+ [  38 1472]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.97      0.99      0.98      1490
+           1       0.99      0.97      0.98      1510
+
+    accuracy                           0.98      3000
+   macro avg       0.98      0.98      0.98      3000
+weighted avg       0.98      0.98      0.98      3000
+
+
+
+
+Logistic Regression Model Performance:
+Logistic Regression Parameters:
+{'penalty': 'l2'}
+
+
+Accuracy Score: 0.9383333333333334
+AUC: 0.9758384817102982
+Confusion Matrix:
+[[1390  100]
+ [  85 1425]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.94      0.93      0.94      1490
+           1       0.93      0.94      0.94      1510
+
+    accuracy                           0.94      3000
+   macro avg       0.94      0.94      0.94      3000
+weighted avg       0.94      0.94      0.94      3000
+
+
+
+
+Neural Network Model Performance:
+
+
+Accuracy Score: 0.9823333333333333
+AUC: 0.991760300457798
+Confusion Matrix:
+[[1470   20]
+ [  33 1477]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.98      0.99      0.98      1490
+           1       0.99      0.98      0.98      1510
+
+    accuracy                           0.98      3000
+   macro avg       0.98      0.98      0.98      3000
+weighted avg       0.98      0.98      0.98      3000
+
+LRCT Model Performance:
+LRCT Parameters:
+{'highest_degree': 1, 'max_depth': 6, 'method': 'ols', 'min_samples_leaf': 5, 'min_samples_split': 5, 'n_bins': 10}
+
+
+Accuracy Score: 0.9793333333333333
+AUC: 0.9899962220543136
+Confusion Matrix:
+[[1467   23]
+ [  39 1471]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.97      0.98      0.98      1490
+           1       0.98      0.97      0.98      1510
+
+    accuracy                           0.98      3000
+   macro avg       0.98      0.98      0.98      3000
+weighted avg       0.98      0.98      0.98      3000
+
