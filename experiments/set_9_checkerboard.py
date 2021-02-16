@@ -154,7 +154,8 @@ if __name__ == '__main__':
         y_train,
         epochs = 1000,
         callbacks = [cb],
-        validation_data = (x_val, y_val)
+        validation_data = (x_val, y_val),
+        verbose = 0
     )
     neural_net.load_weights(checkpoint_file)
 
