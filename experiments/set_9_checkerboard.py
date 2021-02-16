@@ -133,6 +133,9 @@ if __name__ == '__main__':
     input_layer = tf.keras.layers.Input(2)
     x = tf.keras.layers.Dense(10)(input_layer)
     x = tf.keras.layers.Dense(10)(x)
+    x = tf.keras.layers.Dense(10)(x)
+    x = tf.keras.layers.Dense(10)(x)
+    x = tf.keras.layers.Dense(10)(x)
     output_layer = tf.keras.layers.Dense(1, activation = 'sigmoid')(x)
     neural_net = tf.keras.models.Model(input_layer, output_layer)
     neural_net.compile(loss = 'binary_crossentropy', metrics = ['accuracy'], optimizer = 'adam')
@@ -157,7 +160,7 @@ if __name__ == '__main__':
 
     print('Neural Network Model Performance:')
     print('\n')
-    model_report(neural_network, x_test, y_test, neural_net = True)
+    model_report(neural_net, x_test, y_test, neural_net = True)
         
     
     # Lastly, the LRCT
