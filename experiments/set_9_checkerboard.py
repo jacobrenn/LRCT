@@ -73,7 +73,7 @@ if __name__ == '__main__':
         cart_model,
         cart_params,
         n_jobs = -1,
-        verbose = 1,
+        verbose = 0,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
@@ -95,7 +95,7 @@ if __name__ == '__main__':
         knn,
         knn_params,
         n_jobs = -1,
-        verbose = 1,
+        verbose = 0,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         log_reg,
         log_reg_params,
         n_jobs = -1,
-        verbose = 1,
+        verbose = 0,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
         lrct,
         lrct_params,
         n_jobs = -1,
-        verbose = 1,
+        verbose = 0,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
