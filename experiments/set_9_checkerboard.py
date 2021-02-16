@@ -32,6 +32,9 @@ if __name__ == '__main__':
 
     x_train = x_train_val[np.array(train_val_fold) == -1, :]
     y_train = y_train_val[np.array(train_val_fold) == -1].astype(int)
+
+    x_val = x_train_val[np.array(train_val_fold) != -1, :]
+    y_val = y_trani_val[np.array(train_val_fold) != -1].astype(int)
     
     # Plot the data
     plt.figure(figsize = (10, 4))
@@ -126,8 +129,36 @@ if __name__ == '__main__':
     model_report(log_reg_searcher, x_test, y_test)
     print('\n\n')
 
-    #TODO, add neural net here
-    
+    # Neural Network
+    input_layer = tf.keras.layers.Input(2)
+    x = tf.keras.layers.Dense(10)(input_layer)
+    x = tf.keras.layers.Dense(10)(x)
+    output_layer = tf.keras.layers.Dense(1, activation = 'sigmoid')(x)
+    neural_net = tf.keras.models.Model(input_layer, output_layer)
+    neural_net.compile(loss = 'binary_crossentropy', metrics = ['accuracy'], optimizer = 'adam')
+
+    checkpoint_file = '/tmp/checkpoint'
+    cb = tf.keras.callbacks.ModelCheckpoint(
+        filepath = checkpoint_file,
+        save_weights_only = True,
+        monitor = 'val_accuracy',
+        mode = 'max',
+        save_best_only = True
+    )
+
+    neural_net.fit(
+        x_train,
+        y_train,
+        epochs = 100,
+        callbacks = [cb],
+        validation_data = (x_val, y_val)
+    )
+    neural_net.load_weights(checkpoint_file)
+
+    print('Neural Network Model Performance:')
+    print('\n')
+    model_report(neural_network, x_test, y_test, neural_net = True)
+        
     
     # Lastly, the LRCT
     lrct = LRCTree()
