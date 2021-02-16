@@ -18,7 +18,7 @@ from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from exp_utils import model_report
 
 if __name__ == '__main__':
-    # Generate the ata, domain for x0 and x1 is [0, 10]
+    # Generate the data, domain for x0 and x1 is [0, 10]
     np.random.seed(4736)
     two_var_x = np.random.random((10000, 2))
     two_var_x = two_var_x * 10
@@ -50,31 +50,95 @@ if __name__ == '__main__':
     plt.ylim(-0.5, 10.5)
     plt.savefig('exp9/exp_9_training.png')
 
+    # OC1 First
     
-    lrct_params = {
-        'max_depth': range(8, 12),
-        'min_samples_split': range(5, 1, -1),
-        'min_samples_leaf': range(5, 1, -1),
-        'highest_degree': range(1, 3),
-        'n_bins': [10, 20]
-    }
-
     oc1_model = ObliqueTree(splitter = 'oc1')
     oc1_model.fit(x_train, y_train)
 
     print('OC1 Model Performance:')
     
     model_report(oc1_model, x_test, y_test)
+
+    # CART
+    cart_model = DecisionTreeClassifier()
+    cart_params = {
+        'max_depth' : range(18, 20),
+        'min_samples_split' : range(5, 1, -1),
+        'min_samples_leaf' : range(5, 1, -1),
+    }
+
+    cart_searcher = GridSearchCV(
+        cart_model,
+        cart_params,
+        n_jobs = -1,
+        verbose = 0,
+        cv = ps
+    ).fit(x_train_val, y_train_val)
+
+    print('CART Performance:')
+    print('CART Parameters:')
+    print(cart_searcher.best_params_)
+    model_report(cart_searcher, x_test, y_test)
+
+    # KNN
+    knn = KNeighborsClassifier()
+    knn_params = {
+        'n_neighbors' : range(2, 21),
+        'weights' : ['uniform', 'distance']
+    }
+
+    knn_searcher = GridSearchCV(
+        knn,
+        knn_params,
+        n_jobs = -1,
+        verbose = 0,
+        cv = ps
+    ).fit(x_train_val, y_train_val)
+
+    print('KNN Model Performance:')
+    print('KNN Parameters:')
+    print(knn_searcher.best_params_)
+    model_report(knn_searcher, x_test, y_test)
+
+    # Logistic Regression
+    log_reg = LogisticRegression()
+    log_reg_params = {
+        'penalty' : ['l2', 'none']
+    }
+    log_reg_searcher = GridSearchCV(
+        log_reg,
+        log_reg_params,
+        n_jobs = -1,
+        verbose = 0,
+        cv = ps
+    ).fit(x_train_val, y_train_val)
+
+    print('Logistic Regression Model Performance:')
+    print('Logistic Regression Parameters:')
+    print(log_reg_searcher.best_params_)
+    model_report(log_reg_searcher, x_test, y_test)
+
+    
+    # Lastly, the LRCT
+    lrct = LRCTree()
+    lrct_params = {
+        'method' : ['ols', 'ridge', 'lasso'],
+        'max_depth': range(18, 22),
+        'min_samples_split': range(5, 2, -1),
+        'min_samples_leaf': 5,
+        'highest_degree': range(1, 3),
+        'n_bins': [10, 20]
+    }    
     
     lrct_searcher = GridSearchCV(
-        LRCTree(),
+        lrct,
         lrct_params,
         n_jobs = -1,
-        verbose = 3,
+        verbose = 0,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
     print('LRCT Model Performance:')
-    print('LRCT parameters:')
+    print('LRCT Parameters:')
     print(lrct_searcher.best_params_)
     model_report(lrct_searcher, x_test, y_test)
