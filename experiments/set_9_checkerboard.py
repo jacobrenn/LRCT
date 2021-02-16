@@ -125,7 +125,7 @@ if __name__ == '__main__':
         'method' : ['ols', 'ridge', 'lasso'],
         'max_depth': range(18, 22),
         'min_samples_split': range(5, 2, -1),
-        'min_samples_leaf': 5,
+        'min_samples_leaf': [5],
         'highest_degree': range(1, 3),
         'n_bins': [10, 20]
     }    
