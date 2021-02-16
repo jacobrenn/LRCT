@@ -131,11 +131,11 @@ if __name__ == '__main__':
 
     # Neural Network
     input_layer = tf.keras.layers.Input(2)
-    x = tf.keras.layers.Dense(10)(input_layer)
-    x = tf.keras.layers.Dense(10)(x)
-    x = tf.keras.layers.Dense(10)(x)
-    x = tf.keras.layers.Dense(10)(x)
-    x = tf.keras.layers.Dense(10)(x)
+    x = tf.keras.layers.Dense(100, activation = 'relu')(input_layer)
+    x = tf.keras.layers.Dense(100, activation = 'relu')(x)
+    x = tf.keras.layers.Dense(100, activation = 'relu')(x)
+    x = tf.keras.layers.Dense(100, activation = 'relu')(x)
+    x = tf.keras.layers.Dense(100, activation = 'relu')(x)
     output_layer = tf.keras.layers.Dense(1, activation = 'sigmoid')(x)
     neural_net = tf.keras.models.Model(input_layer, output_layer)
     neural_net.compile(loss = 'binary_crossentropy', metrics = ['accuracy'], optimizer = 'adam')
