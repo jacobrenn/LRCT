@@ -120,7 +120,7 @@ if __name__ == '__main__':
     print('\n\n')
 
     # Neural Network
-    input_layer = tf.keras.layers.Input(2)
+    input_layer = tf.keras.layers.Input(x_train.shape[1])
     x = tf.keras.layers.Dense(100, activation = 'relu')(input_layer)
     x = tf.keras.layers.Dense(100, activation = 'relu')(x)
     x = tf.keras.layers.Dense(100, activation = 'relu')(x)
