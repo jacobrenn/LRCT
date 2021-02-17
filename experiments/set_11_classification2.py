@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
     print('Neural Network Model Performance:')
     print('\n')
-    model_report(neural_net, x_test, y_test, neural_net = True)
+    model_report(neural_net, x_test, y_test, neural_net = True, binary = False)
         
     
     # Lastly, the LRCT
