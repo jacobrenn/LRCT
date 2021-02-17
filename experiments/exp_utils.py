@@ -24,7 +24,6 @@ def model_report(
     
     acc = accuracy_score(y_test, preds)
     conf_mat = confusion_matrix(y_test, preds)
-    report = classification_report(y_test, preds)
 
     print(f'Accuracy Score: {acc}')
 
