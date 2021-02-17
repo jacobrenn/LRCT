@@ -51,7 +51,7 @@ if __name__ == '__main__':
     print('OC1 Model Performance:')
     print('\n')
     
-    model_report(oc1_model, x_test, y_test)
+    model_report(oc1_model, x_test, y_test, binary = False)
     print('\n\n')
 
     # CART
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     print('CART Parameters:')
     print(cart_searcher.best_params_)
     print('\n')
-    model_report(cart_searcher, x_test, y_test)
+    model_report(cart_searcher, x_test, y_test, binary = False)
     print('\n\n')
 
     # KNN
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     print('KNN Parameters:')
     print(knn_searcher.best_params_)
     print('\n')
-    model_report(knn_searcher, x_test, y_test)
+    model_report(knn_searcher, x_test, y_test, binary = False)
     print('\n\n')
 
     # Logistic Regression
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     print('Logistic Regression Parameters:')
     print(log_reg_searcher.best_params_)
     print('\n')
-    model_report(log_reg_searcher, x_test, y_test)
+    model_report(log_reg_searcher, x_test, y_test, binary = False)
     print('\n\n')
 
     # Neural Network
@@ -126,9 +126,9 @@ if __name__ == '__main__':
     x = tf.keras.layers.Dense(100, activation = 'relu')(x)
     x = tf.keras.layers.Dense(100, activation = 'relu')(x)
     x = tf.keras.layers.Dense(100, activation = 'relu')(x)
-    output_layer = tf.keras.layers.Dense(1, activation = 'sigmoid')(x)
+    output_layer = tf.keras.layers.Dense(4, activation = 'softmax')(x)
     neural_net = tf.keras.models.Model(input_layer, output_layer)
-    neural_net.compile(loss = 'binary_crossentropy', metrics = ['accuracy'], optimizer = 'adam')
+    neural_net.compile(loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'], optimizer = 'adam')
 
     checkpoint_file = '/tmp/checkpoint'
     cb = tf.keras.callbacks.ModelCheckpoint(
@@ -178,4 +178,4 @@ if __name__ == '__main__':
     print('LRCT Parameters:')
     print(lrct_searcher.best_params_)
     print('\n')
-    model_report(lrct_searcher, x_test, y_test)
+    model_report(lrct_searcher, x_test, y_test, binary = False)
