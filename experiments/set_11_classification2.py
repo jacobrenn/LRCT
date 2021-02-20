@@ -66,7 +66,7 @@ if __name__ == '__main__':
         cart_model,
         cart_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         knn,
         knn_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         log_reg,
         log_reg_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         epochs = 1000,
         callbacks = [cb],
         validation_data = (x_val, y_val),
-        verbose = 0
+        verbose = 1
     )
     neural_net.load_weights(checkpoint_file)
 
@@ -170,7 +170,7 @@ if __name__ == '__main__':
         lrct,
         lrct_params,
         n_jobs = -1,
-        verbose = 0,
+        verbose = 1,
         cv = ps
     ).fit(x_train_val, y_train_val)
 
