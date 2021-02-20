@@ -158,11 +158,11 @@ if __name__ == '__main__':
     lrct = LRCTree()
     lrct_params = {
         'method' : ['ols', 'ridge', 'lasso'],
-        'n_independent' : range(1, 5),
+        'n_independent' : range(1, 4),
         'max_depth': range(1, 5),
         'min_samples_split': range(5, 2, -1),
         'min_samples_leaf': [5],
-        'highest_degree': range(1, 4),
+        'highest_degree': range(1, 3),
         'n_bins': [10]
     }    
     
