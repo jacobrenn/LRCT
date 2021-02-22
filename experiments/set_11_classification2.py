@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # Generate the data, domain for x0 and x1 is [0, 10]
     multivar_x, target = make_classification(
         n_samples = 10000,
-        n_features = 20,
+        n_features = 12,
         n_informative = 6,
         n_redundant = 4,
         n_repeated = 2,
@@ -158,9 +158,9 @@ if __name__ == '__main__':
     lrct = LRCTree()
     lrct_params = {
         'method' : ['ols', 'ridge', 'lasso'],
-        'n_independent' : range(1, 4),
-        'max_depth': range(1, 5),
-        'min_samples_split': range(5, 2, -1),
+        'n_independent' : range(1, 3),
+        'max_depth': range(3, 5),
+        'min_samples_split': [5],
         'min_samples_leaf': [5],
         'highest_degree': range(1, 3),
         'n_bins': [10]
