@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # CART
     cart_model = DecisionTreeClassifier()
     cart_params = {
-        'max_depth' : range(1, 20),
+        'max_depth' : range(1, 12),
         'min_samples_split' : range(5, 1, -1),
         'min_samples_leaf' : range(5, 1, -1),
     }
