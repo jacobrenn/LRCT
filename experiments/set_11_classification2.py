@@ -159,9 +159,7 @@ if __name__ == '__main__':
     lrct_params = {
         'method' : ['ols', 'ridge', 'lasso'],
         'n_independent' : range(1, 3),
-        'max_depth': range(3, 5),
-        'min_samples_split': [5],
-        'min_samples_leaf': [5],
+        'max_depth': range(5, 8),
         'highest_degree': range(1, 3),
         'n_bins': [10]
     }    
