@@ -159,7 +159,7 @@ if __name__ == '__main__':
     lrct_params = {
         'method' : ['ols'],
         'n_independent' : range(1, 3),
-        'max_depth': , [10]
+        'max_depth': [10]
         'highest_degree': range(1, 3),
         'n_bins': [10]
     }    
