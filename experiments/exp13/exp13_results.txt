@@ -1,0 +1,126 @@
+OC1 Model Performance:
+
+
+Accuracy Score: 0.9298245614035088
+Confusion Matrix:
+[[ 52   4]
+ [  8 107]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.87      0.93      0.90        56
+           1       0.96      0.93      0.95       115
+
+    accuracy                           0.93       171
+   macro avg       0.92      0.93      0.92       171
+weighted avg       0.93      0.93      0.93       171
+
+
+
+
+Fitting 1 folds for each of 176 candidates, totalling 176 fits
+CART Performance:
+CART Parameters:
+{'max_depth': 4, 'min_samples_leaf': 2, 'min_samples_split': 5}
+
+
+Accuracy Score: 0.9590643274853801
+Confusion Matrix:
+[[ 52   4]
+ [  3 112]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.95      0.93      0.94        56
+           1       0.97      0.97      0.97       115
+
+    accuracy                           0.96       171
+   macro avg       0.96      0.95      0.95       171
+weighted avg       0.96      0.96      0.96       171
+
+
+
+
+Fitting 1 folds for each of 38 candidates, totalling 38 fits
+KNN Model Performance:
+KNN Parameters:
+{'n_neighbors': 3, 'weights': 'distance'}
+
+
+Accuracy Score: 0.9415204678362573
+Confusion Matrix:
+[[ 50   6]
+ [  4 111]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.93      0.89      0.91        56
+           1       0.95      0.97      0.96       115
+
+    accuracy                           0.94       171
+   macro avg       0.94      0.93      0.93       171
+weighted avg       0.94      0.94      0.94       171
+
+
+
+
+Fitting 1 folds for each of 2 candidates, totalling 2 fits
+Logistic Regression Model Performance:
+Logistic Regression Parameters:
+{'penalty': 'l2'}
+
+
+Accuracy Score: 0.9590643274853801
+Confusion Matrix:
+[[ 51   5]
+ [  2 113]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.96      0.91      0.94        56
+           1       0.96      0.98      0.97       115
+
+    accuracy                           0.96       171
+   macro avg       0.96      0.95      0.95       171
+weighted avg       0.96      0.96      0.96       171
+
+
+
+
+Neural Network Model Performance:
+
+
+Accuracy Score: 0.9590643274853801
+Confusion Matrix:
+[[ 50   6]
+ [  1 114]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.98      0.89      0.93        56
+           1       0.95      0.99      0.97       115
+
+    accuracy                           0.96       171
+   macro avg       0.97      0.94      0.95       171
+weighted avg       0.96      0.96      0.96       171
+
+Fitting 1 folds for each of 42 candidates, totalling 42 fits
+LRCT Model Performance:
+LRCT Parameters:
+{'highest_degree': 2, 'max_depth': 1, 'method': 'ols', 'n_bins': 10, 'n_independent': 2}
+
+
+Accuracy Score: 0.9590643274853801
+Confusion Matrix:
+[[ 51   5]
+ [  2 113]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.96      0.91      0.94        56
+           1       0.96      0.98      0.97       115
+
+    accuracy                           0.96       171
+   macro avg       0.96      0.95      0.95       171
+weighted avg       0.96      0.96      0.96       171
+
