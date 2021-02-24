@@ -7,7 +7,7 @@
 
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_iris()
+from sklearn.datasets import load_iris
 from LRCT import LRCTree
 from sklearn_oblique_tree.oblique import ObliqueTree
 from sklearn.tree import DecisionTreeClassifier
