@@ -7,7 +7,7 @@
 
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_iris()
+from sklearn.datasets import load_breast_cancer
 from LRCT import LRCTree
 from sklearn_oblique_tree.oblique import ObliqueTree
 from sklearn.tree import DecisionTreeClassifier
@@ -20,7 +20,7 @@ from exp_utils import model_report
 
 if __name__ == '__main__':
     # Generate the data, domain for x0 and x1 is [0, 10]
-    data, target = load_iris()['data'], load_iris()['target']
+    data, target = load_breast_cancer()['data'], load_breast_cancer()['target']
 
     # Create train, val, test sets
     x_train_val, x_test, y_train_val, y_test = train_test_split(data, target, test_size = 0.3, random_state = 133523)
