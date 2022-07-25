@@ -4,7 +4,7 @@ Linear Regression Classification Tree
 
 This work is the product of (Jacob Renn's)[https://www.linkedin.com/in/jacob-renn-934009141/] dissertation research at Capitol Technology University.
 
-##Citation
+## Citation
 
 If you use this work as part of your own research, please cite this work using the following citation:
 
