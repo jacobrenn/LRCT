@@ -2,7 +2,7 @@
 
 Linear Regression Classification Tree
 
-This work is the product of [Jacob Renn's](https://www.linkedin.com/in/jacob-renn-934009141/) dissertation research at Capitol Technology University. This package implements the Linear Regression Classification Tree, and explainable, multivariate classififation tree.
+This work is the product of [Jacob Renn's](https://www.linkedin.com/in/jacob-renn-934009141/) dissertation research at Capitol Technology University. This package implements the Linear Regression Classification Tree, an explainable, multivariate classififation tree.
 
 ## Citation
 
