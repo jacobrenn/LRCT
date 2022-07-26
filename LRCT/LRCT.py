@@ -292,7 +292,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         Parameters
         ----------
-        x : 1d array-like
+        x : 2d array-like
             The independent data to learn from
         y : 1d numpy array or pandas Series
             The target to learn
