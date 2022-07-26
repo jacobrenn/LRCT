@@ -19,33 +19,37 @@ if __name__ == '__main__':
     two_var_x = np.random.random((5000, 2))
     two_var_x[:, 0] = two_var_x[:, 0] * 5
     two_var_x[:, 1] = two_var_x[:, 1] * 20
-    target = (two_var_x[:, 1] > 2 + 2*two_var_x[:, 0] - two_var_x[:, 0]**2 + (two_var_x[:, 0]**3)/2).astype(int)
+    target = (two_var_x[:, 1] > 2 + 2*two_var_x[:, 0] -
+              two_var_x[:, 0]**2 + (two_var_x[:, 0]**3)/2).astype(int)
 
     # Create train, val, test sets
-    x_train_val, x_test, y_train_val, y_test = train_test_split(two_var_x, target, test_size = 0.3, random_state = 134456)
-    x_train, x_val, y_train, y_val = train_test_split(x_train_val, y_train_val, test_size = 0.4, random_state = 89582)
-        
+    x_train_val, x_test, y_train_val, y_test = train_test_split(
+        two_var_x, target, test_size=0.3, random_state=134456)
+    x_train, x_val, y_train, y_val = train_test_split(
+        x_train_val, y_train_val, test_size=0.4, random_state=89582)
+
     # Plot the data
-    plt.figure(figsize = (10, 4))
+    plt.figure(figsize=(10, 4))
     plt.scatter(
         x_train[:, 0],
         x_train[:, 1],
-        c = y_train,
-        cmap = 'Set1'
+        c=y_train,
+        cmap='Set1'
     )
-    plt.title('Training Data, Experiment 3', fontsize = 'xx-large')
-    plt.xlabel('Feature 1', fontsize = 'x-large')
-    plt.ylabel('Feature 2', fontsize = 'x-large')
-    plt.xticks(fontsize = 'large')
-    plt.yticks(fontsize = 'large')
+    plt.title('Training Data, Experiment 3', fontsize='xx-large')
+    plt.xlabel('Feature 1', fontsize='x-large')
+    plt.ylabel('Feature 2', fontsize='x-large')
+    plt.xticks(fontsize='large')
+    plt.yticks(fontsize='large')
     plt.xlim(-0.5, 5.5)
     plt.ylim(-0.5, 20.5)
     plt.savefig('exp3/exp_3_training.png')
 
     # Train the models
-    lrct = LRCTree(max_depth = 1, highest_degree = 3, n_bins = 20).fit(x_train, y_train)
-    cart = DecisionTreeClassifier(max_depth = 1).fit(x_train, y_train)
-    oc1 = ObliqueTree(splitter = 'oc1')
+    lrct = LRCTree(max_depth=1, highest_degree=3,
+                   n_bins=20).fit(x_train, y_train)
+    cart = DecisionTreeClassifier(max_depth=1).fit(x_train, y_train)
+    oc1 = ObliqueTree(splitter='oc1')
     oc1.fit(x_train, y_train)
 
     # Print results
@@ -53,12 +57,12 @@ if __name__ == '__main__':
     print('\n')
     model_report(lrct, x_test, y_test)
     print('\n\n')
-    
+
     print('CART Results')
     print('\n')
     model_report(cart, x_test, y_test)
     print('\n\n')
-    
+
     print('OC1 Results')
     print('\n')
     model_report(oc1, x_test, y_test)
@@ -70,25 +74,27 @@ if __name__ == '__main__':
     cubed_coef = float(lrct.nodes[0].split['coefs'][2])
     col1 = lrct.nodes[0].split['indices'][0]
     col2 = lrct.nodes[0].split['indices'][1]
-    split_line = linear_coef * x_test[:, col1] + squared_coef * x_test[:, col1]**2 + cubed_coef * x_test[:, col1]**3 - intercept
+    split_line = linear_coef * x_test[:, col1] + squared_coef * \
+        x_test[:, col1]**2 + cubed_coef * x_test[:, col1]**3 - intercept
 
-    plt.figure(figsize = (10, 4))
+    plt.figure(figsize=(10, 4))
     plt.scatter(
         x_test[:, 0],
         x_test[:, 1],
-        c = y_test,
-        cmap = 'Set1'
+        c=y_test,
+        cmap='Set1'
     )
     plt.scatter(
         x_test[:, 0],
         split_line,
-        c = 'black'
+        c='black'
     )
-    plt.title('LRCT Learned Decision Boundary, Experiment 3', fontsize = 'xx-large')
-    plt.xlabel('Feature 1', fontsize = 'x-large')
-    plt.ylabel('Feature 2', fontsize = 'x-large')
-    plt.xticks(fontsize = 'large')
-    plt.yticks(fontsize = 'large')
+    plt.title('LRCT Learned Decision Boundary, Experiment 3',
+              fontsize='xx-large')
+    plt.xlabel('Feature 1', fontsize='x-large')
+    plt.ylabel('Feature 2', fontsize='x-large')
+    plt.xticks(fontsize='large')
+    plt.yticks(fontsize='large')
     plt.xlim(-0.5, 5.5)
     plt.ylim(-0.5, 20.5)
     plt.savefig('exp3/exp3_learned.png')

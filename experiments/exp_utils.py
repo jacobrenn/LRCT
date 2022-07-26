@@ -1,11 +1,12 @@
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, classification_report
 
+
 def model_report(
         model,
         x_test,
         y_test,
-        binary = True,
-        neural_net = False
+        binary=True,
+        neural_net=False
 ):
     if neural_net:
         probs = model.predict(x_test)
@@ -13,7 +14,7 @@ def model_report(
             probs = probs.flatten()
             preds = (probs >= 0.5).astype(int)
         else:
-            preds = probs.argmax(axis = 1)
+            preds = probs.argmax(axis=1)
 
     else:
         preds = model.predict(x_test)
@@ -21,7 +22,7 @@ def model_report(
             probs = model.predict_proba(x_test)[:, 1]
         except:
             pass
-    
+
     acc = accuracy_score(y_test, preds)
     conf_mat = confusion_matrix(y_test, preds)
 

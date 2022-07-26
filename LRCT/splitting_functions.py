@@ -3,7 +3,8 @@ import pandas as pd
 from itertools import product, combinations
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
 
-def gini_impurity(values, weighted = False):
+
+def gini_impurity(values, weighted=False):
     '''Calculate the Gini impurity measure of a set of values
 
     Parameters
@@ -20,9 +21,9 @@ def gini_impurity(values, weighted = False):
     '''
     # REMOVING TYPE CHECKING TO SPEED UP
     # type checking
-    #if not isinstance(values, np.ndarray):
+    # if not isinstance(values, np.ndarray):
     #    raise TypeError('values must be numpy array')
-    #if len(values.shape) != 1:
+    # if len(values.shape) != 1:
     #    raise ValueError('values have too many dimensions')
 
     # so these numbers don't have to be calculated multiple times
@@ -32,11 +33,12 @@ def gini_impurity(values, weighted = False):
     # short cut
     if unique.shape in [0, 1]:
         return 0
-    
+
     # calculate the score as needed
     if weighted:
         return (1 - np.array([((values == value).sum()/total_num)**2 for value in unique]).sum()) * total_num
     return 1 - np.array([((values == value).sum()/total_num)**2 for value in unique]).sum()
+
 
 def _get_split_candidates(col):
     '''Return all candidates for splitting from a column, i.e. the midpoints 
@@ -59,7 +61,8 @@ def _get_split_candidates(col):
     unique_sorted = np.sort(np.unique(col))
     if unique_sorted.shape[0] == 1:
         return np.nan
-    return np.array(list(zip(unique_sorted, unique_sorted[1:]))).mean(axis = 1)
+    return np.array(list(zip(unique_sorted, unique_sorted[1:]))).mean(axis=1)
+
 
 def _evaluate_split_candidate(x_col, y_values, candidate):
     '''Calculate the results of splitting a column on a single value
@@ -82,9 +85,10 @@ def _evaluate_split_candidate(x_col, y_values, candidate):
     idxer = x_col <= candidate
 
     # calculated the weighted Gini impurity for each 'side'
-    gini_less = gini_impurity(y_values[idxer], weighted = True)
-    gini_greater = gini_impurity(y_values[~idxer], weighted = True)
+    gini_less = gini_impurity(y_values[idxer], weighted=True)
+    gini_greater = gini_impurity(y_values[~idxer], weighted=True)
     return (gini_less + gini_greater) / y_values.shape[0]
+
 
 def _column_best_split(x_col, y_values):
     '''Calculate the best split for a column
@@ -109,10 +113,12 @@ def _column_best_split(x_col, y_values):
 
     if candidates is np.nan:
         return np.array([np.inf, np.inf])
-    
-    candidate_ginis = (_evaluate_split_candidate(x_col, y_values, cand) for cand in candidates)
+
+    candidate_ginis = (_evaluate_split_candidate(
+        x_col, y_values, cand) for cand in candidates)
     split_results = np.array(list(zip(candidates, candidate_ginis)))
     return split_results[split_results[:, 1] == split_results[:, 1].min()][0, :]
+
 
 def find_best_split(x_values, y_values):
     '''Find the best split for a set of values given a target
@@ -138,18 +144,18 @@ def find_best_split(x_values, y_values):
 
     if len(x_values.shape) == 1 or x_values.shape[1] == 1:
         return (0, _column_best_split(x_values, y_values)[0])
-    
+
     split_results = np.apply_along_axis(
         _column_best_split,
         0,
         x_values,
-        y_values = y_values
+        y_values=y_values
     )
 
     best_split = {
-        'col_idx' : None,
-        'split_value' : None,
-        'split_gini' : 1
+        'col_idx': None,
+        'split_value': None,
+        'split_gini': 1
     }
 
     if split_results[1, :].min() == np.inf:
@@ -161,7 +167,8 @@ def find_best_split(x_values, y_values):
     best_split['split_gini'] = split_results[1, col_num]
     return best_split
 
-def _single_col_bin(col, n_bins = 10):
+
+def _single_col_bin(col, n_bins=10):
     '''Bin a single column'''
     return np.linspace(
         col.min(),
@@ -169,7 +176,8 @@ def _single_col_bin(col, n_bins = 10):
         n_bins + 1
     )
 
-def get_bin_coordinates(x_values, col_indices = None, bins_per_var = 10):
+
+def get_bin_coordinates(x_values, col_indices=None, bins_per_var=10):
     '''Get the bin coordinates for a set of values
 
     Parameters
@@ -191,11 +199,12 @@ def get_bin_coordinates(x_values, col_indices = None, bins_per_var = 10):
 
     if col_indices is None:
         col_indices = np.arange(x_values.shape[1])
-    
-    subset = x_values[:, col_indices]
-    return np.apply_along_axis(_single_col_bin, 0, subset, n_bins = bins_per_var)
 
-def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bins_per_var = 10):
+    subset = x_values[:, col_indices]
+    return np.apply_along_axis(_single_col_bin, 0, subset, n_bins=bins_per_var)
+
+
+def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bins_per_var=10):
     '''Get the approximate bin surface coordinates for the surface function
 
     Parameters
@@ -217,42 +226,46 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
         The surface coordinates
     '''
 
-    #raw_bin_coords is an array of coordinates
-    raw_bin_coords = get_bin_coordinates(x_values, bin_col_indices, bins_per_var)
+    # raw_bin_coords is an array of coordinates
+    raw_bin_coords = get_bin_coordinates(
+        x_values, bin_col_indices, bins_per_var)
 
-    #all_indices is an iterable of indices referencing raw_bin_coords
-        #Ex: [[0, 0, 0], [0, 0, 1], ...]
-    all_indices = product(range(bins_per_var), repeat = len(bin_col_indices))
+    # all_indices is an iterable of indices referencing raw_bin_coords
+    #Ex: [[0, 0, 0], [0, 0, 1], ...]
+    all_indices = product(range(bins_per_var), repeat=len(bin_col_indices))
 
-    #coord_array is the array to return
+    # coord_array is the array to return
     coord_array = []
 
-    #iterate over all of the indices: e.g. ind = [0, 0, 1]
+    # iterate over all of the indices: e.g. ind = [0, 0, 1]
     for ind in all_indices:
-        
-        #sub_array will be added to the coord_array
+
+        # sub_array will be added to the coord_array
         sub_array = []
-        
-        #create copies to be sure of overwriting things
+
+        # create copies to be sure of overwriting things
         x_subset = x_values.copy()
         y_subset = y_values.copy()
 
-        #bin_col_indices[i] is the column number
-        #ind[i] is the row index on 
+        # bin_col_indices[i] is the column number
+        # ind[i] is the row index on
         for i in range(len(bin_col_indices)):
-            
-            #col_ind is the *row* index for the specific column -- i.e. things that are in the bin for that col
-            col_ind = (x_subset[:, bin_col_indices[i]] >= raw_bin_coords[ind[i], i]) & (x_subset[:, bin_col_indices[i]] <= raw_bin_coords[ind[i] + 1, i])
-            #append the midpoint of the bin in this variable to sub_array
-            sub_array.append(np.mean([raw_bin_coords[ind[i], i], raw_bin_coords[ind[i] + 1, i]]))
 
-            #create the appropriate subset
+            # col_ind is the *row* index for the specific column -- i.e. things that are in the bin for that col
+            col_ind = (x_subset[:, bin_col_indices[i]] >= raw_bin_coords[ind[i], i]) & (
+                x_subset[:, bin_col_indices[i]] <= raw_bin_coords[ind[i] + 1, i])
+            # append the midpoint of the bin in this variable to sub_array
+            sub_array.append(
+                np.mean([raw_bin_coords[ind[i], i], raw_bin_coords[ind[i] + 1, i]]))
+
+            # create the appropriate subset
             x_subset = x_subset[col_ind]
             y_subset = y_subset[col_ind]
-        
-        #get the coordinate in the dimension of target_col
+
+        # get the coordinate in the dimension of target_col
         try:
-            split_info = find_best_split(x_subset[:, target_col_index], y_subset)
+            split_info = find_best_split(
+                x_subset[:, target_col_index], y_subset)
             if split_info is np.nan:
                 split = np.inf
             else:
@@ -264,7 +277,8 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
     coord_array = np.array(coord_array)
     return coord_array[coord_array[:, -1] != np.inf]
 
-def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, method = 'ols', **kwargs):
+
+def get_surface_coef(surface_coords, highest_degree=1, fit_intercept=True, method='ols', **kwargs):
     '''Creates the estimate to the surface function
 
     Parameters
@@ -288,13 +302,14 @@ def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, m
 
     # checking for the different possibilities for method
     if method == 'ols':
-        model = LinearRegression(fit_intercept = fit_intercept, **kwargs)
+        model = LinearRegression(fit_intercept=fit_intercept, **kwargs)
     elif method == 'ridge':
-        model = Ridge(fit_intercept = fit_intercept, **kwargs)
+        model = Ridge(fit_intercept=fit_intercept, **kwargs)
     elif method == 'lasso':
-        model = Lasso(fit_intercept = fit_intercept, **kwargs)
+        model = Lasso(fit_intercept=fit_intercept, **kwargs)
     else:
-        raise ValueError(f'Accepted values for `method` are `ols`, `ridge`, and `lasso`, got {method}')
+        raise ValueError(
+            f'Accepted values for `method` are `ols`, `ridge`, and `lasso`, got {method}')
 
     # separate the prediction and the predictor columns
     predictor_columns = surface_coords[:, :-1]
@@ -305,13 +320,15 @@ def get_surface_coef(surface_coords, highest_degree = 1, fit_intercept = True, m
     if highest_degree > 1:
         for degree in range(2, highest_degree + 1):
             for col_idx in range(predictor_columns.shape[1]):
-                predictor_columns = np.concatenate([predictor_columns, (predictor_columns[:, col_idx]**degree).reshape(-1, 1)], axis = 1)
+                predictor_columns = np.concatenate(
+                    [predictor_columns, (predictor_columns[:, col_idx]**degree).reshape(-1, 1)], axis=1)
 
     # fit the regression model
     model.fit(predictor_columns, prediction_column.reshape(-1, 1))
     return model.coef_[0].flatten()
 
-def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree = 1, fit_intercept = True, method = 'ols', n_bins = 10, **kwargs):
+
+def find_best_lrct_split(x_values, y_values, num_independent=1, highest_degree=1, fit_intercept=True, method='ols', n_bins=10, **kwargs):
     '''Find the best split on data using LRCT methods
 
     Parameters
@@ -347,10 +364,10 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
 
     # instantiate a dictionary to return
     split_values = {
-        'indices' : None,
-        'coefs' : None,
-        'split_value' : None,
-        'split_gini' : 1
+        'indices': None,
+        'coefs': None,
+        'split_value': None,
+        'split_gini': 1
     }
 
     # get all of the surface coordinates fo each of the combinations of columns to determine the coordinates from
@@ -358,16 +375,16 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
         surface_coords = get_surface_coords(
             x_copy,
             y_values,
-            bin_col_indices = ind[:-1],
-            target_col_index = ind[-1],
-            bins_per_var = n_bins
+            bin_col_indices=ind[:-1],
+            target_col_index=ind[-1],
+            bins_per_var=n_bins
         )
         try:
             surface_coefs = get_surface_coef(
-                surface_coords = surface_coords,
-                highest_degree = highest_degree,
-                fit_intercept = fit_intercept,
-                method = method,
+                surface_coords=surface_coords,
+                highest_degree=highest_degree,
+                fit_intercept=fit_intercept,
+                method=method,
                 **kwargs
             )
 
@@ -376,7 +393,7 @@ def find_best_lrct_split(x_values, y_values, num_independent = 1, highest_degree
             for i in range(surface_coefs.shape[0]):
                 column_idx = ind[i % (len(ind) - 1)]
                 power = (i // (len(ind) - 1)) + 1
-                new_col += surface_coefs[i]*x_copy[:,column_idx]**power
+                new_col += surface_coefs[i]*x_copy[:, column_idx]**power
             new_col -= x_copy[:, ind[-1]]
             best_split = _column_best_split(new_col, y_values)
             if best_split[1] < split_values['split_gini']:

@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 from LRCT.LRCT import LRCTree
 from LRCT.Exceptions import NotFitError
 
+
 class MultiClassLRCT(BaseEstimator, ClassifierMixin):
     """Multi-Class Linear Regression Classification Tree
 
@@ -13,14 +14,14 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
 
     def __init__(
             self,
-            max_depth = None,
-            min_samples_split = 2,
-            min_samples_leaf = 1,
-            n_independent = 1,
-            highest_degree = 1,
-            fit_intercepts = True,
-            method = 'ols',
-            n_bins = 10,
+            max_depth=None,
+            min_samples_split=2,
+            min_samples_leaf=1,
+            n_independent=1,
+            highest_degree=1,
+            fit_intercepts=True,
+            method='ols',
+            n_bins=10,
             **kwargs
     ):
         """
@@ -50,7 +51,7 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
         **kwargs : additional keyword arguments
             Additional keyword arguments to pass to the linear regression models
         """
-        
+
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
@@ -66,7 +67,7 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
 
     def fit(self, x, y):
         """Fit the Tree
-        
+
         Parameters
         ----------
         x : 2d array-like
@@ -79,16 +80,17 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
         tree : MultiClassLRCT
            The fit tree (self)
         """
-       
+
         if not isinstance(x, (np.ndarray, pd.DataFrame)):
             raise TypeError('x must be numpy array or DataFrame')
         if not isinstance(y, (np.ndarray, pd.Series)):
             raise TypeError('y must be ndarray or Series')
         if len(y.shape) != 1:
             raise ValueError('y must have a single dimension')
-        
+
         if x.shape[0] != y.shape[0]:
-            raise ValueError('Number of records does not match number of samples')
+            raise ValueError(
+                'Number of records does not match number of samples')
 
         if isinstance(y, pd.Series):
             y = y.values
@@ -110,8 +112,9 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
         self._is_fit = True
         return self
 
-    def _predict_single_instance(self, instance, proba = False):
-        probs = np.array([t._predict_single_instance(instance, proba = True)[1] for t in self.trees])
+    def _predict_single_instance(self, instance, proba=False):
+        probs = np.array([t._predict_single_instance(
+            instance, proba=True)[1] for t in self.trees])
         probs = probs/probs.sum()
         if proba:
             return probs
@@ -136,8 +139,8 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
         """
         if not self._is_fit:
             raise NotFitError
-        
-        return np.apply_along_axis(lambda row : self._predict_single_instance(row, proba = False), 1, x)
+
+        return np.apply_along_axis(lambda row: self._predict_single_instance(row, proba=False), 1, x)
 
     def predict_proba(self, x):
         """Predict class probabilities for a set of values
@@ -155,7 +158,7 @@ class MultiClassLRCT(BaseEstimator, ClassifierMixin):
         if not self._is_fit:
             raise NotFitError
 
-        return np.apply_along_axis(lambda row : self._predict_single_instance(row, proba = True), 1, x)
+        return np.apply_along_axis(lambda row: self._predict_single_instance(row, proba=True), 1, x)
 
     def fit_predict(self, x, y):
         """Fit the model and predict on X

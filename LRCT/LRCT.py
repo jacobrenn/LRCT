@@ -167,10 +167,12 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         - Raises ValueError if Node is passed with identifier that already exists in Tree
         """
         is_node = isinstance(nodes, Node)
-        acceptable_list = isinstance(nodes, list) and all([isinstance(n, Node) for n in nodes])
+        acceptable_list = isinstance(nodes, list) and all(
+            [isinstance(n, Node) for n in nodes])
 
         if not (is_node or acceptable_list):
-            raise ValueError('adding nodes requires Node objects or list of Node objects')
+            raise ValueError(
+                'adding nodes requires Node objects or list of Node objects')
 
         # figure out the existing IDs
         existing_ids = [id for id in self._nodes.keys()]
@@ -193,7 +195,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         if self._nodes == {}:
             print('Empty Tree')
         else:
-            print('\n'.join([f'{"-" * n.depth}{n}' for n in self._nodes.values()]))
+            print(
+                '\n'.join([f'{"-" * n.depth}{n}' for n in self._nodes.values()]))
 
     def _split_node(self, node_id, x_data, y_data):
         """Split a Node as in training
@@ -256,8 +259,10 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             split = best_lrct_split
 
         if split.get('col_idx') is not None:
-            less_idx = x_copy[:, split.get('col_idx')] <= split.get('split_value')
-            greater_idx = x_copy[:, split.get('col_idx')] > split.get('split_value')
+            less_idx = x_copy[:, split.get(
+                'col_idx')] <= split.get('split_value')
+            greater_idx = x_copy[:, split.get(
+                'col_idx')] > split.get('split_value')
         else:
             ind = split['indices']
             new_col = np.zeros(x_copy.shape[0])
@@ -282,7 +287,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             parent_id,
             parent_depth + 1
         )
-            
+
         self._add_nodes([less_node, greater_node])
         self._nodes[parent_id].split = split
         return highest_id + 1, highest_id + 2, x_copy[less_idx], x_copy[greater_idx], y_data[less_idx], y_data[greater_idx]
@@ -313,7 +318,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         # check the shapes of each variable
         if x.shape[0] != y.shape[0]:
-            raise ValueError('Number of records does not match number of samples')
+            raise ValueError(
+                'Number of records does not match number of samples')
 
         # if y is pandas Series, use only values (numpy array)
         if isinstance(y, pd.Series):
@@ -337,7 +343,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         while self.depth < self.max_depth:
 
             # record current depth Nodes and how many Nodes exist to determine stopping criteria later
-            current_depth_nodes = [n for n in self.nodes if n.depth == self.depth]
+            current_depth_nodes = [
+                n for n in self.nodes if n.depth == self.depth]
             num_nodes = len(self.nodes)
 
             # try to split all of the current depth Nodes
@@ -380,14 +387,15 @@ class LRCTree(BaseEstimator, ClassifierMixin):
 
         # _node_distributions helps with predicting
         self.node_distributions_ = {
-            n.identifier: np.array([(node_data[n.identifier]['y'] == i).sum() for i in self.values_to_predict_])
+            n.identifier: np.array(
+                [(node_data[n.identifier]['y'] == i).sum() for i in self.values_to_predict_])
             for n in self.nodes if n.split is np.nan
         }
 
         # return self for consistency with scikit-learn
         return self
 
-    def _predict_single_instance(self, instance, proba = False):
+    def _predict_single_instance(self, instance, proba=False):
         """Predict a single new instance
 
         Parameters
@@ -407,7 +415,8 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         current_node = self._nodes[0]
 
         while isinstance(current_node.split, dict):
-            child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
+            child_node_ids = [
+                n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
             if current_node.split.get('col_idx') is not None:
                 if instance[current_node.split['col_idx']] <= current_node.split['split_value']:
                     new_node_id = min(child_node_ids)
@@ -419,21 +428,23 @@ class LRCTree(BaseEstimator, ClassifierMixin):
                 for i in range(current_node.split['coefs'].shape[0]):
                     column_index = ind[i % (len(ind) - 1)]
                     power = (i // (len(ind) - 1)) + 1
-                    new_val += current_node.split['coefs'][i]*instance[column_index]**power
+                    new_val += current_node.split['coefs'][i] * \
+                        instance[column_index]**power
                 new_val -= instance[ind[-1]]
                 if new_val <= current_node.split['split_value']:
                     new_node_id = min(child_node_ids)
                 else:
                     new_node_id = max(child_node_ids)
-            
+
             current_node = self._nodes[new_node_id]
-        
+
         # after we're out of the while loop, get the current distribution to see what we need to predict
-        current_distribution = self.node_distributions_[current_node.identifier]
+        current_distribution = self.node_distributions_[
+            current_node.identifier]
 
         # get the probabilities
         probabilities = current_distribution / current_distribution.sum()
-        
+
         # return probabilities if asked for
         if proba:
             return probabilities
@@ -441,11 +452,12 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             # check if there's a clear winner
             if (probabilities == probabilities.max()).sum() == 1:
                 return probabilities.argmax()
-            
+
             # if there's no clear winner, return a random guess from the most common ones
-            highest_indices = [i for i in range(probabilities.shape[0]) if probabilities[i] == probabilities.max()]
+            highest_indices = [i for i in range(
+                probabilities.shape[0]) if probabilities[i] == probabilities.max()]
             return np.random.choice(highest_indices)
-            
+
     def _predict_single_proba(self, instance):
         """Predict class probabilities for a single instance
 
@@ -465,19 +477,25 @@ class LRCTree(BaseEstimator, ClassifierMixin):
         current_node = self._nodes[0]
 
         while isinstance(current_node.split, tuple):
-            child_node_ids = [n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
+            child_node_ids = [
+                n.identifier for n in self.nodes if n.parent_id == current_node.identifier]
             split_col, split_value = current_node.split
             if split_col not in instance.keys():
-                rest, last_col = split_col.split(' - ')[0], split_col.split(' - ')[1]
+                rest, last_col = split_col.split(
+                    ' - ')[0], split_col.split(' - ')[1]
                 new_coefs = [item.split('*')[0] for item in rest.split(' + ')]
-                new_cols = [item.split('*')[1].split('^')[0] for item in rest.split(' + ')]
+                new_cols = [item.split('*')[1].split('^')[0]
+                            for item in rest.split(' + ')]
                 new_col_components = []
                 for i in range(len(new_coefs)):
                     if '^' in new_cols[i]:
-                        col, exp = new_cols[i].split('^')[0], new_cols[i].split('^')[1]
-                        new_col_components.append(f'{new_coefs[i]}*instance["{col}"]**{exp}')
+                        col, exp = new_cols[i].split(
+                            '^')[0], new_cols[i].split('^')[1]
+                        new_col_components.append(
+                            f'{new_coefs[i]}*instance["{col}"]**{exp}')
                     else:
-                        new_col_components.append(f'{new_coefs[i]}*instance["{new_cols[i]}"]')
+                        new_col_components.append(
+                            f'{new_coefs[i]}*instance["{new_cols[i]}"]')
                 new_col_str = ' + '.join(new_col_components)
                 new_col_str += f' - instance["{last_col}"]'
                 val_to_check = eval(new_col_str)
@@ -510,7 +528,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             raise NotFitError
 
         # this function just applies the _predict_single_instance method to each of the rows
-        return np.apply_along_axis(lambda row : self._predict_single_instance(row, proba = False), 1, x)
+        return np.apply_along_axis(lambda row: self._predict_single_instance(row, proba=False), 1, x)
 
     def predict_proba(self, x):
         """Predict class probabilities for a set of values
@@ -529,7 +547,7 @@ class LRCTree(BaseEstimator, ClassifierMixin):
             raise NotFitError
 
         # apply predicting with probabilities
-        return np.apply_along_axis(lambda row : self._predict_single_instance(row, proba = True), 1, x)
+        return np.apply_along_axis(lambda row: self._predict_single_instance(row, proba=True), 1, x)
 
     def score(self, x, y):
         """Score the model's performance on new labeled data using accuracy score as a measure
