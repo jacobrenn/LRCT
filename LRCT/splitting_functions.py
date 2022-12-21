@@ -204,7 +204,7 @@ def get_bin_coordinates(x_values, col_indices=None, bins_per_var=10):
     return np.apply_along_axis(_single_col_bin, 0, subset, n_bins=bins_per_var)
 
 
-def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bins_per_var=10):
+def get_surface_coords(x_values, y_values, bin_col_indices, target_col_idx, bins_per_var=10):
     '''Get the approximate bin surface coordinates for the surface function
 
     Parameters
@@ -215,7 +215,7 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
         The target values
     bin_col_indices : index-like
         Columns to use for binning
-    target_col_index : int
+    target_col_idx : int
         The column to use in for splitting
     bins_per_var : int (default 10)
         The number of bins to use per variable
@@ -265,7 +265,7 @@ def get_surface_coords(x_values, y_values, bin_col_indices, target_col_index, bi
         # get the coordinate in the dimension of target_col
         try:
             split_info = find_best_split(
-                x_subset[:, target_col_index], y_subset)
+                x_subset[:, target_col_idx], y_subset)
             if split_info is np.nan:
                 split = np.inf
             else:
@@ -376,7 +376,7 @@ def find_best_lrct_split(x_values, y_values, num_independent=1, highest_degree=1
             x_copy,
             y_values,
             bin_col_indices=ind[:-1],
-            target_col_index=ind[-1],
+            target_col_idx=ind[-1],
             bins_per_var=n_bins
         )
         try:
@@ -403,5 +403,54 @@ def find_best_lrct_split(x_values, y_values, num_independent=1, highest_degree=1
                 split_values['split_gini'] = best_split[1]
         except ValueError:
             pass
+
+    return split_values
+
+def find_best_heuristic_lrct_split(best_univariate_split, x_values, y_values, n_independent = 1, highest_degree = 1, fit_intercept = True, method = 'ols', n_bins = 10, **kwargs):
+    x_copy = np.asarray(x_values).copy()
+
+    split_values = {
+        'indices' : best_univariate_split['col_idx'],
+        'coefs' : [1],
+        'split_value' : best_univariate_split['split_value'],
+        'split_gini' : best_univariate_split['split_gini']
+    }
+
+    indices = [best_univariate_split['col_idx']]
+    for i in range(1, n_independent + 1):
+        available_indices = [col for col in range(x_copy.shape[1]) if col not in indices]
+        for index in available_indices:
+            total_indices = indices + [index]
+            surface_coords = get_surface_coords(
+                x_copy,
+                y_values,
+                bin_col_indices = total_indices[:-1],
+                target_col_idx = total_indices[-1],
+                bins_per_var = n_bins
+            )
+            try:
+                surface_coefs = get_surface_coef(
+                    surface_coords = surface_coords,
+                    highest_degree = highest_degree,
+                    fit_intercept = fit_intercept,
+                    method = method,
+                    **kwargs
+                )
+                new_col = np.zeros(x_copy.shape[0])
+                for j in range(surface_coefs.shape[0]):
+                    column_idx = total_indices[i % (len(total_indices) - 1)]
+                    power = (i // (len(total_indices) - 1)) + 1
+                    new_col += surface_coefs[j]*x_copy[:, column_idx]**power
+                new_col -= x_copy[:, total_indices[-1]]
+                best_split = _column_best_split(new_col, y_values)
+                if best_split[1] < split_values['split_gini']:
+                    split_values['indices'] = total_indices
+                    split_values['coefs'] = surface_coefs
+                    split_values['split_value'] = best_split[0]
+                    split_values['split_gini'] = best_split[1]
+                    indices = total_indices
+                
+            except ValueError as e:
+                print(e)
 
     return split_values
